@@ -1,15 +1,14 @@
 % ============================================================
-% Chapter 1 — Introduction to Web Application Security
+% Chapter 1 --- Introduction to Web Application Security
 % ============================================================
 \chapter{Introduction to Web Application Security}
 \label{ch:intro}
 
 \noteblock{This chapter is designed for absolute beginners. No prior security knowledge is required. Read through carefully before moving to any hands-on chapters.}
 
-% ─────────────────────────────────────────────────────────
 \section{What is Web Application Security?}
 
-A \textbf{web application} is any software that runs in a browser — online banking portals, social media platforms, e-commerce stores, admin dashboards, and APIs that power mobile apps. These applications handle highly sensitive data: passwords, payment details, personal information, and confidential business records.
+A \textbf{web application} is any software that runs in a browser --- online banking portals, social media platforms, e-commerce stores, admin dashboards, and APIs that power mobile apps. These applications handle highly sensitive data: passwords, payment details, personal information, and confidential business records.
 
 \textbf{Web application security} is the discipline of identifying, understanding, and fixing weaknesses in web applications that could allow an attacker to:
 
@@ -21,12 +20,11 @@ A \textbf{web application} is any software that runs in a browser — online ban
   \item Disrupt the application's availability
 \end{itemize}
 
-\noteblock{Think of a web application as a building. Web application security is the process of checking every door, window, lock, and alarm system — before a burglar does.}
+\noteblock{Think of a web application as a building. Web application security is the process of checking every door, window, lock, and alarm system --- before a burglar does.}
 
-% ─────────────────────────────────────────────────────────
 \section{Why Organizations Perform Penetration Testing}
 
-Organizations spend significant money building secure applications, yet breaches happen constantly. The reason is simple: \textit{developers are not attackers}. Penetration testing (pen testing) closes this gap by employing skilled professionals who think and act like real attackers — but with written authorization.
+Organizations spend significant money building secure applications, yet breaches happen constantly. The reason is simple: \textit{developers are not attackers}. Penetration testing (pen testing) closes this gap by employing skilled professionals who think and act like real attackers --- but with written authorization.
 
 \begin{table}[H]
 \centering
@@ -44,7 +42,6 @@ Developer Feedback & Gives development teams real attack scenarios to learn from
 \end{tabularx}
 \end{table}
 
-% ─────────────────────────────────────────────────────────
 \section{Vulnerability Assessment vs Penetration Testing}
 
 These two terms are often confused. They are related but fundamentally different.
@@ -69,12 +66,11 @@ Use case & Regular scanning & Pre-launch, compliance \\
 
 \noteblock{A \textbf{vulnerability assessment} tells you \textit{what might be wrong}. A \textbf{penetration test} proves \textit{what can actually be exploited} and shows the real business impact.}
 
-% ─────────────────────────────────────────────────────────
 \section{Authorized vs Unauthorized Testing}
 
 \dangerblock{
 \textbf{Testing any system without explicit written authorization is illegal.}\\[4pt]
-Most countries — including the UK (Computer Misuse Act), USA (CFAA), and EU member states — impose criminal penalties including imprisonment for unauthorized computer access, regardless of intent.\\[6pt]
+Most countries --- including the UK (Computer Misuse Act), USA (CFAA), and EU member states --- impose criminal penalties including imprisonment for unauthorized computer access, regardless of intent.\\[6pt]
 This guide covers both authorized lab practice and the techniques attackers use in the wild. Understanding unauthorized attack techniques is essential for defenders. However, you must \textbf{only practice on systems you own or have written permission to test}.
 }
 
@@ -83,11 +79,11 @@ This guide covers both authorized lab practice and the techniques attackers use 
 Authorized testing (legitimate penetration testing) always involves:
 
 \begin{enumerate}[leftmargin=*]
-  \item \textbf{Rules of Engagement} — written document defining scope, methods, and time window
-  \item \textbf{Scope Definition} — exact list of IP addresses, domains, and endpoints in scope
-  \item \textbf{Emergency Contacts} — who to call if testing causes unintended impact
-  \item \textbf{Safe Harbors} — legal protection clauses for the tester
-  \item \textbf{Deliverable Agreement} — what report format and findings will be provided
+  \item \textbf{Rules of Engagement} --- written document defining scope, methods, and time window
+  \item \textbf{Scope Definition} --- exact list of IP addresses, domains, and endpoints in scope
+  \item \textbf{Emergency Contacts} --- who to call if testing causes unintended impact
+  \item \textbf{Safe Harbors} --- legal protection clauses for the tester
+  \item \textbf{Deliverable Agreement} --- what report format and findings will be provided
 \end{enumerate}
 
 \subsection{Unauthorized Testing (What NOT to Do)}
@@ -98,12 +94,11 @@ Unauthorized testing includes:
   \item Running scanners against websites you do not own
   \item Testing a production system beyond the agreed scope
   \item Using discovered credentials to access other systems
-  \item Accessing, copying, or exfiltrating real data — even if accidentally discovered
+  \item Accessing, copying, or exfiltrating real data --- even if accidentally discovered
 \end{itemize}
 
 \warnblock{Even if you are ``just testing'' or ``trying to help'', unauthorized testing can result in criminal charges. Always get written authorization first.}
 
-% ─────────────────────────────────────────────────────────
 \section{Security Testing Methodology}
 
 Professional penetration testers follow a structured methodology. This guide uses the following phases throughout all attack modules:
@@ -125,7 +120,6 @@ Phase & Name & Description \\
 \end{tabularx}
 \end{table}
 
-% ─────────────────────────────────────────────────────────
 \section{OWASP Top 10 Overview}
 \label{sec:owasp}
 
@@ -152,38 +146,38 @@ A10 & Server-Side Request Forgery & Server fetches attacker-controlled URLs \\
 \end{tabularx}
 \end{table}
 
-\subsection{A01 — Broken Access Control}
+\subsection{A01 --- Broken Access Control}
 The most common OWASP finding. Users perform actions or access data beyond their authorized permissions. Examples: accessing \texttt{/admin} without login, reading another user's files by changing an ID parameter.
 
-\subsection{A02 — Cryptographic Failures}
+\subsection{A02 --- Cryptographic Failures}
 Sensitive data transmitted or stored without proper encryption. Examples: passwords stored as plain MD5, credit card numbers sent over HTTP, weak JWT secrets.
 
-\subsection{A03 — Injection}
+\subsection{A03 --- Injection}
 The application passes untrusted user input to an interpreter (SQL, OS, LDAP). The interpreter executes the input as a command. SQL Injection is the most well-known example.
 
-\subsection{A04 — Insecure Design}
+\subsection{A04 --- Insecure Design}
 Security flaws baked into the architecture. No amount of patching fixes a fundamentally broken design. Example: a password reset flow that does not verify ownership of the email address.
 
-\subsection{A05 — Security Misconfiguration}
+\subsection{A05 --- Security Misconfiguration}
 Default credentials, verbose error messages, exposed debug endpoints, open cloud storage buckets, missing security headers. This is what Level 01 of this course focuses on.
 
-\subsection{A06 — Vulnerable Components}
+\subsection{A06 --- Vulnerable Components}
 Using outdated libraries, frameworks, or OS packages with known CVEs. A single vulnerable npm package in a Node.js application can expose the entire server.
 
-\subsection{A07 — Authentication Failures}
+\subsection{A07 --- Authentication Failures}
 Weak passwords permitted, no brute-force protection, session tokens not invalidated on logout, predictable session IDs. Level 02 covers these in depth.
 
-\subsection{A08 — Software Integrity Failures}
+\subsection{A08 --- Software Integrity Failures}
 Applications that auto-update without verifying signatures, or CI/CD pipelines that can be compromised to inject malicious code into production builds.
 
-\subsection{A09 — Logging \& Monitoring Failures}
+\subsection{A09 --- Logging \& Monitoring Failures}
 Without detailed logs, attackers operate invisibly. Failed login storms, IDOR probes, and SQL injection attempts should all trigger alerts.
 
-\subsection{A10 — Server-Side Request Forgery (SSRF)}
+\subsection{A10 --- Server-Side Request Forgery (SSRF)}
 The server makes HTTP requests to attacker-controlled URLs. Attackers use this to reach internal services, AWS metadata endpoints, and internal databases not exposed to the internet.
 
 \exerciseblock{
-\textbf{Exercise 1.1 — OWASP Mapping}\\[4pt]
+\textbf{Exercise 1.1 --- OWASP Mapping}\\[4pt]
 For each of the following scenarios, identify the OWASP A0X:2021 category:
 \begin{enumerate}
   \item A URL parameter \texttt{?user\_id=123} can be changed to \texttt{?user\_id=124} to view another user's profile
