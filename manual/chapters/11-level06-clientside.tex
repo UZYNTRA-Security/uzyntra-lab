@@ -1,0 +1,90 @@
+% ============================================================
+% Chapter 11 — Level 06: Client-Side Security
+% ============================================================
+\chapter{Level 06 — Client-Side Security}
+\label{ch:level06}
+
+\noteblock{This module is a \textbf{placeholder}. Lab: \texttt{https://xss.lab.uzyntra.com} (pending deployment).}
+
+\section{Learning Objectives}
+\begin{itemize}
+  \item Understand and identify Cross-Site Scripting (XSS) vulnerabilities
+  \item Test for Cross-Site Request Forgery (CSRF)
+  \item Analyze DOM-based security issues
+  \item Use Burp Suite to capture and analyze client-side attack vectors
+\end{itemize}
+
+\section{Vulnerability Explanations}
+
+\subsection{Cross-Site Scripting (XSS)}
+XSS allows attackers to inject client-side scripts into pages viewed by other users.
+
+\begin{table}[H]
+\centering
+\caption{XSS types}
+\begin{tabularx}{\textwidth}{>{\bfseries}lX}
+\toprule
+Type & Description \\
+\midrule
+Reflected & Payload in URL parameter, reflected in response immediately \\
+Stored & Payload saved in database, executed for all users viewing that data \\
+DOM-Based & Payload processed by client-side JavaScript, never sent to server \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\begin{lstlisting}[style=http, caption={Basic XSS test payload}]
+# Test input field with:
+<script>alert(1)</script>
+
+# If alert() pops -> Reflected/Stored XSS confirmed
+
+# URL-encoded variant (for URL parameters):
+GET /search?q=%3Cscript%3Ealert(1)%3C%2Fscript%3E HTTP/1.1
+\end{lstlisting}
+
+\subsection{CSRF — Cross-Site Request Forgery}
+CSRF tricks an authenticated user's browser into making unintended requests to the application.
+
+\begin{itemize}
+  \item Missing or predictable CSRF token
+  \item CSRF token not tied to user session
+  \item SameSite cookie attribute not set
+\end{itemize}
+
+\section{Burp Suite Testing Process}
+
+\subsection{XSS Testing}
+\begin{enumerate}
+  \item Find input fields (search, comments, profile name)
+  \item Capture request in Burp $\to$ Send to Repeater
+  \item Inject test payload: \texttt{<script>alert(1)</script>}
+  \item Check if payload appears unescaped in response
+  \item Test HTML attribute context: \texttt{"><script>alert(1)</script>}
+  \item Test filter evasion: \texttt{<img src=x onerror=alert(1)>}
+\end{enumerate}
+
+\subsection{CSRF Testing}
+\begin{enumerate}
+  \item Find a state-changing action (change email, change password)
+  \item Capture the request in Burp
+  \item Check for CSRF token in the request body or headers
+  \item In Repeater: remove the CSRF token $\to$ does the request succeed?
+  \item If yes, CSRF protection is missing or bypassable
+\end{enumerate}
+
+\section{Module Completion Checklist}
+
+\begin{tcolorbox}[findingstyle, title={Level 06 Burp Checklist}]
+\begin{itemize}
+  \item[\checkbox] All input fields identified and mapped
+  \item[\checkbox] XSS test payload injected in each field
+  \item[\checkbox] Reflected XSS tested in URL parameters
+  \item[\checkbox] Stored XSS tested in persistent fields (comments, profile)
+  \item[\checkbox] Content-Security-Policy header checked
+  \item[\checkbox] CSRF tokens present on all state-changing forms
+  \item[\checkbox] CSRF token removed $\to$ request tested in Repeater
+  \item[\checkbox] SameSite cookie attribute checked
+  \item[\checkbox] All findings documented with PoC payloads
+\end{itemize}
+\end{tcolorbox}

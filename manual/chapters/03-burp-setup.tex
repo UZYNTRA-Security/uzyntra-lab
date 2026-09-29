@@ -1,0 +1,210 @@
+% ============================================================
+% Chapter 3 — Burp Suite Community Edition Setup
+% ============================================================
+\chapter{Burp Suite Community Edition — Complete Setup}
+\label{ch:burpsetup}
+
+% ─────────────────────────────────────────────────────────
+\section{What is Burp Suite?}
+
+Burp Suite is the industry-standard toolkit for web application security testing, developed by \textbf{PortSwigger}. It acts as an intercepting proxy — sitting between your browser and the web application — capturing and allowing modification of every HTTP/HTTPS request and response.
+
+Think of it as a \textbf{glass pipe} through which all your browser's traffic flows. You can pause traffic, read it, change it, replay it, and analyze it in detail.
+
+\screenshotbox{Burp Suite architecture — Browser $\to$ Burp Proxy $\to$ Web Application}
+
+% ─────────────────────────────────────────────────────────
+\section{Community vs Professional Edition}
+
+\begin{table}[H]
+\centering
+\caption{Burp Suite Community vs Professional}
+\begin{tabularx}{\textwidth}{>{\bfseries}lXX}
+\toprule
+Feature & Community (Free) & Professional (\$449/yr) \\
+\midrule
+Intercepting Proxy & \checkmark & \checkmark \\
+Repeater & \checkmark & \checkmark \\
+Decoder / Comparer & \checkmark & \checkmark \\
+Intruder & Limited (throttled) & Full speed \\
+Automated Scanner & \texttimes & \checkmark \\
+Active Scanning & \texttimes & \checkmark \\
+Burp Collaborator & \texttimes & \checkmark \\
+Save/Load Projects & \texttimes & \checkmark \\
+Extensions (BApp Store) & Limited & Full \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\noteblock{The Community Edition is sufficient for all exercises in this guide. The throttled Intruder speed is frustrating but workable for learning. Professional is recommended for real engagements.}
+
+% ─────────────────────────────────────────────────────────
+\section{Installation on Kali Linux}
+
+\subsection{Method 1 — APT (Recommended)}
+
+\begin{lstlisting}[style=terminal, caption={Install via apt}]
+sudo apt update
+sudo apt install burpsuite -y
+\end{lstlisting}
+
+\begin{table}[H]
+\centering
+\begin{tabularx}{\textwidth}{>{\bfseries}lX}
+\toprule
+Step & Action \\
+\midrule
+Expected result & \texttt{burpsuite} command available in terminal \\
+Java dependency & Installed automatically if missing \\
+Launch & Type \texttt{burpsuite} or find in Applications $\to$ Web Application Analysis \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Method 2 — Manual Download}
+
+\begin{lstlisting}[style=terminal, caption={Download and run Burp Suite manually}]
+# Download from PortSwigger
+wget "https://portswigger.net/burp/releases/download?product=community&type=Linux" \
+     -O burpsuite_community_linux.sh
+
+# Make executable
+chmod +x burpsuite_community_linux.sh
+
+# Run installer
+./burpsuite_community_linux.sh
+\end{lstlisting}
+
+\subsection{Creating a Desktop Shortcut}
+
+\begin{lstlisting}[style=terminal, caption={Create desktop shortcut for Burp Suite}]
+cat > ~/Desktop/burpsuite.desktop << 'EOF'
+[Desktop Entry]
+Type=Application
+Name=Burp Suite Community
+Comment=Web Application Security Testing
+Exec=burpsuite
+Icon=burpsuite
+Terminal=false
+Categories=Security;
+EOF
+
+chmod +x ~/Desktop/burpsuite.desktop
+\end{lstlisting}
+
+% ─────────────────────────────────────────────────────────
+\section{First Launch and Configuration}
+
+\subsection{Starting Burp Suite}
+
+\begin{lstlisting}[style=terminal, caption={Launch Burp Suite from terminal}]
+burpsuite &
+\end{lstlisting}
+
+On first launch:
+\begin{enumerate}
+  \item Select \textbf{Temporary project} (Community Edition cannot save projects)
+  \item Select \textbf{Use Burp defaults}
+  \item Click \textbf{Start Burp}
+\end{enumerate}
+
+\screenshotbox{Burp Suite startup screen — project selection dialog}
+
+\subsection{Verify Proxy Listener}
+
+\begin{enumerate}
+  \item Go to \textbf{Proxy} $\to$ \textbf{Proxy settings}
+  \item Under \textbf{Proxy listeners}, confirm: \texttt{127.0.0.1:8080} is \textbf{Running}
+  \item If not running, click \textbf{Add} and create a listener on \texttt{127.0.0.1:8080}
+\end{enumerate}
+
+\screenshotbox{Proxy listener settings — 127.0.0.1:8080 active}
+
+% ─────────────────────────────────────────────────────────
+\section{Configuring Firefox to Use Burp Proxy}
+
+\subsection{Install FoxyProxy Extension}
+
+\begin{enumerate}
+  \item Open Firefox
+  \item Go to: \url{https://addons.mozilla.org/en-US/firefox/addon/foxyproxy-standard/}
+  \item Click \textbf{Add to Firefox}
+  \item Click the FoxyProxy icon in the toolbar
+  \item Click \textbf{Options} $\to$ \textbf{Add}
+  \item Configure:
+    \begin{itemize}
+      \item Title: \texttt{Burp Suite}
+      \item Proxy Type: \texttt{HTTP}
+      \item Proxy IP: \texttt{127.0.0.1}
+      \item Port: \texttt{8080}
+    \end{itemize}
+  \item Save, then select \textbf{Burp Suite} from the FoxyProxy menu to enable
+\end{enumerate}
+
+\screenshotbox{FoxyProxy configuration — Burp Suite proxy entry}
+
+% ─────────────────────────────────────────────────────────
+\section{Installing the Burp CA Certificate}
+
+Without the CA certificate, HTTPS sites will show SSL warnings and Burp cannot read encrypted traffic.
+
+\begin{enumerate}
+  \item With Burp proxy \textbf{active} in Firefox, navigate to: \texttt{http://burpsuite}
+  \item Click \textbf{CA Certificate} to download \texttt{cacert.der}
+  \item In Firefox: Settings $\to$ Privacy \& Security $\to$ Certificates $\to$ \textbf{View Certificates}
+  \item Click \textbf{Authorities} tab $\to$ \textbf{Import}
+  \item Select the downloaded \texttt{cacert.der} file
+  \item Check: \textbf{Trust this CA to identify websites}
+  \item Click \textbf{OK}
+\end{enumerate}
+
+\begin{lstlisting}[style=terminal, caption={Alternatively import certificate via command line}]
+# Convert DER to PEM
+openssl x509 -inform DER -in cacert.der -out burp-ca.crt
+
+# Add to system trust store (optional, for curl/wget)
+sudo cp burp-ca.crt /usr/local/share/ca-certificates/burp-ca.crt
+sudo update-ca-certificates
+\end{lstlisting}
+
+\noteblock{After installing the CA certificate, navigate to any HTTPS site in Firefox (with Burp proxy active). You should see no SSL errors, and the request should appear in Burp's HTTP History.}
+
+% ─────────────────────────────────────────────────────────
+\section{Updating Burp Suite}
+
+\subsection{Check Current Version}
+
+\begin{lstlisting}[style=terminal, caption={Check Burp Suite version}]
+# If installed via apt
+apt show burpsuite | grep Version
+
+# In Burp UI: Help -> About Burp Suite
+\end{lstlisting}
+
+\subsection{Update via APT}
+
+\begin{lstlisting}[style=terminal, caption={Update Burp Suite}]
+sudo apt update && sudo apt install --only-upgrade burpsuite -y
+\end{lstlisting}
+
+\subsection{Update Extensions (BApp Store)}
+
+\begin{enumerate}
+  \item In Burp: \textbf{Extensions} $\to$ \textbf{BApp Store}
+  \item Filter by \textbf{Installed}
+  \item Click \textbf{Update} next to extensions with available updates
+\end{enumerate}
+
+\exerciseblock{
+\textbf{Exercise 3.1 — Burp Setup Verification}\\[4pt]
+Complete all steps and verify each:
+\begin{enumerate}
+  \item Launch Burp Suite — confirm proxy listener on \texttt{127.0.0.1:8080}
+  \item Configure Firefox with FoxyProxy pointing to \texttt{127.0.0.1:8080}
+  \item Install Burp CA certificate in Firefox
+  \item Enable intercept, navigate to \texttt{https://example.com} in Firefox
+  \item Confirm request appears in Burp Proxy $\to$ Intercept panel
+  \item Forward the request and confirm the page loads in Firefox
+\end{enumerate}
+If all 6 steps succeed, your Burp Suite environment is ready.
+}

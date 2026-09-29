@@ -1,0 +1,285 @@
+% ============================================================
+% Chapter 4 — Burp Suite Interface Explained
+% ============================================================
+\chapter{Burp Suite Interface Explained}
+\label{ch:burpinterface}
+
+\noteblock{This chapter explains every Burp Suite module you will use in this course. Read this before starting any attack module — it is your reference for understanding what each tool does and when to use it.}
+
+% ─────────────────────────────────────────────────────────
+\section{Proxy}
+\label{sec:proxy}
+
+\subsection{What It Does}
+
+The Proxy is the heart of Burp Suite. It intercepts all HTTP/HTTPS traffic between your browser and the target application, allowing you to read, pause, modify, and forward every request and response.
+
+\subsection{Traffic Flow}
+
+\begin{center}
+\begin{tabular}{ccccc}
+\textbf{Browser} & $\longrightarrow$ & \textbf{Burp Proxy} & $\longrightarrow$ & \textbf{Target App} \\
+& & \updownarrow & & \\
+& & \textbf{You (tester)} & & \\
+\end{tabular}
+\end{center}
+
+\subsection{Intercept ON / OFF}
+
+\begin{table}[H]
+\centering
+\caption{Intercept mode comparison}
+\begin{tabularx}{\textwidth}{>{\bfseries}lX}
+\toprule
+Mode & Behavior \\
+\midrule
+Intercept ON & Each request pauses in Burp — you must manually forward or drop it \\
+Intercept OFF & Traffic flows through transparently — all requests logged in HTTP History \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\noteblock{For passive reconnaissance (browsing to map endpoints), use \textbf{Intercept OFF}. Turn it \textbf{ON} only when you need to modify a specific request before it reaches the server.}
+
+\subsection{HTTP History}
+
+HTTP History (\textbf{Proxy} $\to$ \textbf{HTTP History}) records every request/response passing through Burp. Key columns:
+
+\begin{table}[H]
+\centering
+\caption{HTTP History columns explained}
+\begin{tabular}{ll}
+\toprule
+Column & Meaning \\
+\midrule
+\# & Request number (sequential) \\
+Method & GET, POST, PUT, DELETE \\
+URL & Full request URL \\
+Status & HTTP response code (200, 404, 302, etc.) \\
+Length & Response body size (useful for spotting differences) \\
+MIME & Content type of the response \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Request Modification}
+
+When Intercept is ON, you can modify the request before forwarding:
+\begin{itemize}
+  \item Change parameter values
+  \item Add, remove, or modify headers
+  \item Change the HTTP method (GET $\to$ POST)
+  \item Inject payloads into the body
+\end{itemize}
+
+\subsection{Response Analysis}
+
+Click any request in HTTP History $\to$ click \textbf{Response} tab to see:
+\begin{itemize}
+  \item HTTP status code and reason phrase
+  \item All response headers (look for missing security headers)
+  \item Response body (HTML, JSON, XML)
+  \item Use \textbf{Ctrl+F} to search for keywords: \texttt{password}, \texttt{token}, \texttt{admin}, \texttt{error}
+\end{itemize}
+
+\screenshotbox{Burp Proxy — HTTP History with request/response panes}
+
+% ─────────────────────────────────────────────────────────
+\section{Target}
+\label{sec:target}
+
+\subsection{What It Does}
+
+The Target module maintains a \textbf{Site Map} of everything discovered about the target application and lets you control the \textbf{Scope} — what Burp tracks and tests.
+
+\subsection{Setting Scope}
+
+Always define scope before testing. This prevents accidentally testing out-of-scope systems.
+
+\begin{enumerate}
+  \item Go to \textbf{Target} $\to$ \textbf{Scope settings}
+  \item Click \textbf{Add}
+  \item Enter: \texttt{https://recon.lab.uzyntra.com} (or your target)
+  \item Optionally: set \textbf{Out-of-scope} entries for paths you must avoid
+\end{enumerate}
+
+\warnblock{In a real engagement, only test what is explicitly in scope. Testing out-of-scope systems — even accidentally — can terminate an engagement and create legal issues.}
+
+\subsection{Site Map}
+
+The Site Map (\textbf{Target} $\to$ \textbf{Site Map}) builds automatically as you browse. It shows:
+\begin{itemize}
+  \item All discovered URLs and endpoints
+  \item HTTP methods seen at each endpoint
+  \item Response codes
+  \item Linked resources (JS files, CSS, images)
+\end{itemize}
+
+\exerciseblock{
+\textbf{Exercise 4.1 — Target Mapping}\\[4pt]
+\begin{enumerate}
+  \item Add \texttt{https://recon.lab.uzyntra.com} to Burp scope
+  \item Turn Intercept \textbf{OFF}
+  \item Browse: \texttt{/}, \texttt{/about}, \texttt{/contact}, \texttt{/debug}, \texttt{/admin}, \texttt{/backup}, \texttt{/robots.txt}
+  \item Open Target $\to$ Site Map
+  \item Expand the host — how many endpoints were discovered?
+  \item Right-click the host $\to$ \textbf{Spider this host} to find more
+\end{enumerate}
+}
+
+% ─────────────────────────────────────────────────────────
+\section{Repeater}
+\label{sec:repeater}
+
+\subsection{Purpose}
+
+Repeater allows you to send a captured HTTP request multiple times with modifications, comparing the responses. It is the most used Burp tool for manual vulnerability testing.
+
+\subsection{Sending a Request to Repeater}
+
+\begin{enumerate}
+  \item In HTTP History or Intercept, right-click a request
+  \item Select \textbf{Send to Repeater} (or press \textbf{Ctrl+R})
+  \item Switch to the \textbf{Repeater} tab
+  \item Modify the request in the left pane
+  \item Click \textbf{Send}
+  \item Analyze the response in the right pane
+\end{enumerate}
+
+\screenshotbox{Repeater — request on left, response on right}
+
+\subsection{Common Repeater Actions}
+
+\begin{table}[H]
+\centering
+\caption{Repeater testing steps}
+\begin{tabularx}{\textwidth}{>{\bfseries}lXX}
+\toprule
+Step & Action & Security Meaning \\
+\midrule
+Change parameter value & Edit \texttt{id=1} to \texttt{id=2} & Test for IDOR \\
+Remove Authorization header & Delete the \texttt{Authorization:} line & Test for missing auth \\
+Change HTTP method & GET $\to$ POST & Test for method confusion \\
+Inject SQL & Change value to \texttt{' OR 1=1 --} & Test for SQL injection \\
+Modify Content-Type & Change \texttt{application/json} to \texttt{text/xml} & Test for parser confusion \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+% ─────────────────────────────────────────────────────────
+\section{Intruder}
+\label{sec:intruder}
+
+\subsection{Purpose}
+
+Intruder automates customized attacks — iterating through payloads in request parameters. Use cases: brute force, fuzzing, enumeration.
+
+\subsection{Attack Types}
+
+\begin{table}[H]
+\centering
+\caption{Burp Intruder attack types}
+\begin{tabularx}{\textwidth}{>{\bfseries}lX}
+\toprule
+Type & Description \\
+\midrule
+Sniper & One payload position, one wordlist — most common \\
+Battering Ram & Same payload inserted into all positions simultaneously \\
+Pitchfork & Multiple positions, multiple lists — pairs items (e.g. user+pass) \\
+Cluster Bomb & Multiple positions, all combinations — combinatorial (slow) \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Setting Positions}
+
+\begin{enumerate}
+  \item Send a request to Intruder (\textbf{Ctrl+I})
+  \item Go to \textbf{Positions} tab
+  \item Click \textbf{Clear §} to remove all auto-detected positions
+  \item Highlight the value you want to fuzz (e.g. a username or directory name)
+  \item Click \textbf{Add §} — the value becomes \texttt{\S{}payload\S{}}
+\end{enumerate}
+
+\subsection{Community Edition Limitation}
+
+\dangerblock{Burp Suite Community Edition \textbf{throttles Intruder to 1 request per second}. For large wordlists (10,000+ entries), this is very slow. For real engagements, use Professional Edition or alternative tools like \texttt{ffuf} or \texttt{hydra} for brute forcing.}
+
+% ─────────────────────────────────────────────────────────
+\section{Decoder}
+\label{sec:decoder}
+
+\subsection{Purpose}
+
+Decoder encodes and decodes data in various formats. Essential for analyzing tokens, cookies, and obfuscated values.
+
+\subsection{Supported Formats}
+
+\begin{table}[H]
+\centering
+\caption{Decoder supported encodings}
+\begin{tabularx}{\textwidth}{>{\bfseries}lXl}
+\toprule
+Format & Use Case & Example \\
+\midrule
+URL Encode & Decode URL parameters & \texttt{\%3D} $\to$ \texttt{=} \\
+Base64 & Decode JWT headers/payloads, cookies & \texttt{dXNlcg==} $\to$ \texttt{user} \\
+HTML Entity & Decode XSS-filtered output & \texttt{\&lt;} $\to$ \texttt{<} \\
+Hex & Decode binary or hex-encoded data & \texttt{48656c6c6f} $\to$ \texttt{Hello} \\
+Gzip & Decompress compressed responses & binary $\to$ text \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Using Decoder}
+
+\begin{enumerate}
+  \item Go to \textbf{Decoder} tab
+  \item Paste the encoded value
+  \item Select \textbf{Decode as} $\to$ choose format
+  \item View the decoded output
+  \item Stack operations: decode Base64 $\to$ then URL decode the result
+\end{enumerate}
+
+\noteblock{JWT tokens use Base64URL encoding (slightly different from standard Base64 — uses \texttt{-} and \texttt{\_} instead of \texttt{+} and \texttt{/}). Burp's Decoder handles both variants.}
+
+% ─────────────────────────────────────────────────────────
+\section{Comparer}
+\label{sec:comparer}
+
+\subsection{Purpose}
+
+Comparer performs a word-level or byte-level diff between two responses. This is invaluable when you need to spot subtle differences — for example, determining whether a username exists (different response length or content).
+
+\subsection{Using Comparer}
+
+\begin{enumerate}
+  \item In HTTP History, right-click a response $\to$ \textbf{Send to Comparer}
+  \item Repeat with a second response
+  \item Go to \textbf{Comparer} tab
+  \item Click \textbf{Words} for semantic diff or \textbf{Bytes} for binary diff
+  \item Highlighted differences show what changed between the two responses
+\end{enumerate}
+
+\exerciseblock{
+\textbf{Exercise 4.2 — Comparer Practice}\\[4pt]
+\begin{enumerate}
+  \item In Repeater, send a request to \texttt{/admin} with no cookies
+  \item Send it to Comparer
+  \item Add an \texttt{Authorization: Bearer fake\_token} header and send again
+  \item Send that response to Comparer
+  \item Compare — what changed in the response?
+\end{enumerate}
+}
+
+% ─────────────────────────────────────────────────────────
+\section{Dashboard}
+
+The Dashboard provides:
+\begin{itemize}
+  \item \textbf{Event log} — all Burp activities and errors
+  \item \textbf{Issue activity} — vulnerability findings (Pro only for auto-scan)
+  \item \textbf{Tasks} — manage running operations
+\end{itemize}
+
+\noteblock{In Community Edition, the Dashboard mostly shows the Event log. Check it if Burp behaves unexpectedly — connection errors, certificate issues, and configuration problems appear here.}

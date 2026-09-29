@@ -1,0 +1,56 @@
+% ============================================================
+% Chapter 12 — Level 07: Business Logic Testing
+% ============================================================
+\chapter{Level 07 — Business Logic Testing}
+\label{ch:level07}
+
+\noteblock{This module is a \textbf{placeholder}. Lab: \texttt{https://logic.lab.uzyntra.com} (pending deployment).}
+
+\section{Learning Objectives}
+\begin{itemize}
+  \item Understand what constitutes a business logic vulnerability
+  \item Identify workflow flaws in multi-step processes
+  \item Test for race condition vulnerabilities
+  \item Document abuse cases from an attacker's perspective
+\end{itemize}
+
+\section{Vulnerability Explanations}
+
+\subsection{Workflow Vulnerabilities}
+Business logic flaws arise when application functionality can be abused in ways not intended by developers. These cannot be detected by automated scanners — they require understanding the application's intended purpose.
+
+\textbf{Examples:}
+\begin{itemize}
+  \item Applying a discount code multiple times
+  \item Skipping steps in a checkout or registration flow
+  \item Negative quantity in a cart (receive money instead of paying)
+  \item Password reset without verifying email ownership
+  \item Unlocking premium features by modifying response values
+\end{itemize}
+
+\subsection{Race Conditions}
+Race conditions occur when two or more processes access shared data concurrently and the outcome depends on timing.
+
+\textbf{Classic example:} Two simultaneous withdrawal requests both pass the balance check before either completes the deduction, allowing double-spending.
+
+\begin{lstlisting}[style=terminal, caption={Burp Turbo Intruder for race condition testing}]
+# In Burp: Extensions -> BApp Store -> Install "Turbo Intruder"
+# Send the target request to Turbo Intruder
+# Set concurrency to 20-50 simultaneous requests
+# Fire all at the same time to trigger race condition
+\end{lstlisting}
+
+\section{Module Completion Checklist}
+
+\begin{tcolorbox}[findingstyle, title={Level 07 Burp Checklist}]
+\begin{itemize}
+  \item[\checkbox] Application workflow fully mapped in Burp Site Map
+  \item[\checkbox] Multi-step flows tested for step-skipping
+  \item[\checkbox] Numerical values tested with negative numbers
+  \item[\checkbox] Discount/coupon codes tested for reuse
+  \item[\checkbox] Response values modified in Repeater (price, role, status)
+  \item[\checkbox] Race condition tested with Turbo Intruder
+  \item[\checkbox] Abuse cases documented from attacker perspective
+  \item[\checkbox] All findings include business impact, not just technical impact
+\end{itemize}
+\end{tcolorbox}

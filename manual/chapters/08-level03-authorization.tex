@@ -1,0 +1,87 @@
+% ============================================================
+% Chapter 8 — Level 03: Authorization Testing
+% ============================================================
+\chapter{Level 03 — Authorization \& Access Control Testing}
+\label{ch:level03}
+
+\noteblock{This module is a \textbf{placeholder}. Lab environment: \texttt{https://authz.lab.uzyntra.com} (pending deployment).}
+
+\section{Learning Objectives}
+\begin{itemize}
+  \item Understand and test for Insecure Direct Object References (IDOR)
+  \item Identify Broken Object Level Authorization (BOLA) in APIs
+  \item Test for vertical and horizontal privilege escalation
+  \item Use Burp Repeater and Intruder for access control testing
+\end{itemize}
+
+\section{Vulnerability Explanations}
+
+\subsection{IDOR — Insecure Direct Object Reference}
+IDOR occurs when an application uses user-controllable input to access objects directly without verifying that the requesting user is authorized to access that specific object.
+
+\textbf{Classic example:}
+\begin{lstlisting}[style=http, caption={IDOR in URL parameter}]
+# Authenticated as user 100:
+GET /api/orders/1001 HTTP/1.1
+Authorization: Bearer <user_100_token>
+
+HTTP/1.1 200 OK
+{"orderId": 1001, "userId": 100, "total": "$49.99"}
+
+# Change order ID to another user's order:
+GET /api/orders/1002 HTTP/1.1
+Authorization: Bearer <user_100_token>
+
+HTTP/1.1 200 OK   <-- IDOR: should be 403
+{"orderId": 1002, "userId": 101, "total": "$129.99"}
+\end{lstlisting}
+
+\subsection{BOLA — Broken Object Level Authorization}
+BOLA is the API-specific name for IDOR, classified as OWASP API Security \#1. The application exposes endpoints that handle object IDs without enforcing authorization per-object.
+
+\subsection{Privilege Escalation}
+
+\begin{table}[H]
+\centering
+\caption{Types of privilege escalation}
+\begin{tabularx}{\textwidth}{>{\bfseries}lX}
+\toprule
+Type & Description \\
+\midrule
+Horizontal & Access another user's data at the same privilege level \\
+Vertical & Gain higher privilege (user $\to$ admin) \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{Burp Suite Testing Process}
+
+\subsection{Testing for IDOR}
+\begin{enumerate}
+  \item Log in as User A — capture a request containing your user/object ID
+  \item Send to Repeater
+  \item Change the ID to another user's ID (increment by 1, try other values)
+  \item If the server returns the other user's data with HTTP 200 $\to$ IDOR confirmed
+  \item Log in as User B to confirm the data belongs to User B
+\end{enumerate}
+
+\subsection{Automated ID Enumeration with Intruder}
+\begin{lstlisting}[style=http, caption={Intruder position for IDOR enumeration}]
+GET /api/v1/users/§101§/profile HTTP/1.1
+Authorization: Bearer <your_token>
+\end{lstlisting}
+Set payload: Numbers, from 1 to 500, step 1. Filter by response length — consistent non-zero length = data returned = IDOR.
+
+\section{Module Completion Checklist}
+
+\begin{tcolorbox}[findingstyle, title={Level 03 Burp Checklist}]
+\begin{itemize}
+  \item[\checkbox] Authenticated as low-privilege user — own object IDs captured
+  \item[\checkbox] Object IDs enumerated in Repeater — other user data accessible?
+  \item[\checkbox] Intruder used to enumerate full ID range
+  \item[\checkbox] Admin endpoints tested with regular user token
+  \item[\checkbox] Parameter tampering tested: \texttt{role=admin}, \texttt{isAdmin=true}
+  \item[\checkbox] HTTP method tampering tested (GET, POST, PUT, DELETE)
+  \item[\checkbox] All findings documented with evidence
+\end{itemize}
+\end{tcolorbox}

@@ -1,0 +1,140 @@
+% ============================================================
+% Chapter 5 — Web Security Testing Methodology
+% ============================================================
+\chapter{Web Security Testing Methodology}
+\label{ch:methodology}
+
+% ─────────────────────────────────────────────────────────
+\section{Overview}
+
+Every attack module in this guide follows the same structured methodology. Learning this process is as important as learning the individual techniques. Professional penetration testers are distinguished from script kiddies not by the tools they use, but by their systematic approach.
+
+\begin{table}[H]
+\centering
+\caption{UZYNTRA Security Testing Methodology}
+\begin{tabularx}{\textwidth}{>{\bfseries}clX}
+\toprule
+Phase & Name & Key Activities \\
+\midrule
+1 & Pre-Engagement & Define scope, get authorization, set up tools \\
+2 & Reconnaissance & Passive \& active information gathering \\
+3 & Scanning \& Enumeration & Map endpoints, identify technologies \\
+4 & Vulnerability Analysis & Identify potential weaknesses \\
+5 & Exploitation & Attempt controlled exploitation \\
+6 & Post-Exploitation & Determine impact, access depth \\
+7 & Reporting & Document findings with evidence \\
+8 & Remediation Verification & Retest after fixes are applied \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+% ─────────────────────────────────────────────────────────
+\section{Phase 1 — Pre-Engagement}
+
+Before touching any target:
+
+\begin{itemize}
+  \item Obtain written \textbf{Rules of Engagement} document
+  \item Confirm exact \textbf{scope}: domains, IPs, endpoints in/out of scope
+  \item Note \textbf{time window}: when testing is permitted
+  \item Confirm \textbf{emergency contacts} and escalation path
+  \item Set up \textbf{isolated test environment}: separate VM, clean browser profile
+\end{itemize}
+
+\dangerblock{Never start any testing — even passive recon — without written authorization. ``I thought it was okay'' is not a legal defense.}
+
+% ─────────────────────────────────────────────────────────
+\section{Phase 2 — Reconnaissance}
+
+\subsection{Passive Reconnaissance (No direct target contact)}
+
+\begin{table}[H]
+\centering
+\caption{Passive reconnaissance techniques}
+\begin{tabularx}{\textwidth}{>{\bfseries}lX}
+\toprule
+Technique & Tools / Method \\
+\midrule
+WHOIS lookup & \texttt{whois target.com} \\
+DNS enumeration & \texttt{dig target.com ANY}, \texttt{dnsx}, \texttt{amass} \\
+Google Dorking & \texttt{site:target.com filetype:sql} \\
+Shodan & Search for exposed services: \url{https://shodan.io} \\
+Certificate transparency & \url{https://crt.sh/?q=target.com} \\
+GitHub recon & Search for leaked API keys, config files \\
+Wayback Machine & \url{https://web.archive.org} — find old endpoints \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Active Reconnaissance (Direct target contact)}
+
+\begin{lstlisting}[style=terminal, caption={Active recon commands}]
+# Check robots.txt
+curl https://target.com/robots.txt
+
+# Check HTTP headers
+curl -I https://target.com/
+
+# Directory enumeration
+gobuster dir -u https://target.com -w /usr/share/seclists/Discovery/Web-Content/common.txt
+
+# Nikto web scanner
+nikto -h https://target.com
+\end{lstlisting}
+
+% ─────────────────────────────────────────────────────────
+\section{Phase 3 — Scanning and Enumeration with Burp}
+
+\subsection{Burp Suite Scanning Workflow}
+
+\begin{enumerate}
+  \item Add target to Burp scope
+  \item Turn intercept \textbf{OFF}
+  \item Browse all pages of the application manually
+  \item Check Burp Target $\to$ Site Map for all discovered URLs
+  \item Right-click target $\to$ \textbf{Spider this host}
+  \item Review all \texttt{GET}/\texttt{POST} endpoints in HTTP History
+  \item Identify all input points: forms, URL parameters, JSON fields, cookies, headers
+\end{enumerate}
+
+\subsection{Input Surface Identification}
+
+\begin{table}[H]
+\centering
+\caption{Common input points to identify}
+\begin{tabularx}{\textwidth}{>{\bfseries}lX}
+\toprule
+Input Type & Where to Look \\
+\midrule
+URL parameters & \texttt{?id=1\&type=user} \\
+POST body fields & Login forms, search boxes, profile update \\
+HTTP headers & \texttt{User-Agent}, \texttt{Referer}, \texttt{X-Forwarded-For}, custom headers \\
+Cookies & Session tokens, preference values, tracking IDs \\
+JSON body & API requests: \texttt{\{"userId":123,"action":"view"\}} \\
+Path parameters & \texttt{/api/v1/users/123/profile} \\
+File uploads & Name, content-type, file content \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+% ─────────────────────────────────────────────────────────
+\section{Universal Burp Suite Testing Checklist}
+
+Use this checklist for every target. Each attack module adds its own specific checklist on top of these basics.
+
+\begin{tcolorbox}[findingstyle, title={Universal Burp Checklist}]
+\begin{itemize}
+  \item[\checkbox] Target added to Burp scope
+  \item[\checkbox] Proxy configured and CA certificate installed
+  \item[\checkbox] Intercept OFF — browsed all application pages
+  \item[\checkbox] HTTP History reviewed — all endpoints logged
+  \item[\checkbox] Site Map complete — all paths discovered
+  \item[\checkbox] All input points identified and documented
+  \item[\checkbox] Response headers checked for security misconfigurations
+  \item[\checkbox] Cookies analyzed (flags, entropy, predictability)
+  \item[\checkbox] \texttt{robots.txt} and \texttt{sitemap.xml} reviewed
+  \item[\checkbox] Error pages tested — information disclosure checked
+  \item[\checkbox] Authentication flow captured and analyzed
+  \item[\checkbox] All findings documented with request/response evidence
+\end{itemize}
+\end{tcolorbox}

@@ -1,0 +1,256 @@
+% ============================================================
+% UZYNTRA Security — Web Application Security Practice Guide
+% Author: Muhammad Usama
+% Compiler: pdflatex main.tex
+% ============================================================
+
+\documentclass[12pt,a4paper,oneside]{book}
+
+% ── Encoding & Fonts ─────────────────────────────────────
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+
+% ── Page Layout ──────────────────────────────────────────
+\usepackage[
+  top=2.5cm, bottom=2.5cm,
+  left=3cm,  right=2.5cm,
+  headheight=15pt
+]{geometry}
+
+% ── Colors ───────────────────────────────────────────────
+\usepackage{xcolor}
+\definecolor{uzblue}{HTML}{0891B2}      % cyan-600
+\definecolor{uzdark}{HTML}{0F172A}      % slate-950
+\definecolor{uzgray}{HTML}{475569}      % slate-600
+\definecolor{uzred}{HTML}{DC2626}       % red-600
+\definecolor{uzyellow}{HTML}{D97706}    % amber-600
+\definecolor{uzgreen}{HTML}{16A34A}     % green-600
+\definecolor{uzcodebg}{HTML}{1E293B}    % slate-800
+\definecolor{uzcodefg}{HTML}{E2E8F0}    % slate-200
+
+% ── Graphics & Boxes ─────────────────────────────────────
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{tcolorbox}
+\tcbuselibrary{skins, breakable, listings}
+\usepackage{mdframed}
+\usepackage{fancybox}
+
+% ── Tables ───────────────────────────────────────────────
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{multirow}
+\usepackage{colortbl}
+
+% ── Lists & Checklists ───────────────────────────────────
+\usepackage{enumitem}
+\usepackage{amssymb}   % for \square
+
+% ── Code Listings ────────────────────────────────────────
+\usepackage{listings}
+
+\lstdefinestyle{terminal}{
+  backgroundcolor=\color{uzdark},
+  basicstyle=\ttfamily\small\color{uzcodefg},
+  breaklines=true,
+  breakatwhitespace=true,
+  frame=single,
+  framerule=0.5pt,
+  rulecolor=\color{uzblue},
+  xleftmargin=10pt,
+  xrightmargin=10pt,
+  aboveskip=8pt,
+  belowskip=8pt,
+  showstringspaces=false,
+  numberstyle=\tiny\color{uzgray},
+  numbers=left,
+  numbersep=8pt,
+}
+
+\lstdefinestyle{http}{
+  backgroundcolor=\color{uzcodebg},
+  basicstyle=\ttfamily\footnotesize\color{uzcodefg},
+  breaklines=true,
+  frame=single,
+  framerule=0.5pt,
+  rulecolor=\color{uzgray},
+  xleftmargin=10pt,
+  xrightmargin=10pt,
+  aboveskip=8pt,
+  belowskip=8pt,
+  showstringspaces=false,
+}
+
+\lstdefinestyle{code}{
+  backgroundcolor=\color{uzcodebg},
+  basicstyle=\ttfamily\small\color{uzcodefg},
+  keywordstyle=\color{uzblue}\bfseries,
+  stringstyle=\color{uzgreen},
+  commentstyle=\color{uzgray}\itshape,
+  breaklines=true,
+  frame=single,
+  framerule=0.5pt,
+  rulecolor=\color{uzblue},
+  xleftmargin=10pt,
+  xrightmargin=10pt,
+  aboveskip=8pt,
+  belowskip=8pt,
+  showstringspaces=false,
+  numbers=left,
+  numberstyle=\tiny\color{uzgray},
+  numbersep=8pt,
+}
+
+% ── Custom tcolorbox styles ──────────────────────────────
+\tcbset{
+  notestyle/.style={
+    enhanced, breakable,
+    colback=uzblue!8, colframe=uzblue,
+    fonttitle=\bfseries\sffamily,
+    title={📘 Note},
+    left=6pt, right=6pt, top=4pt, bottom=4pt,
+  },
+  warningstyle/.style={
+    enhanced, breakable,
+    colback=uzyellow!10, colframe=uzyellow,
+    fonttitle=\bfseries\sffamily,
+    title={⚠ Warning},
+    left=6pt, right=6pt, top=4pt, bottom=4pt,
+  },
+  dangerstyle/.style={
+    enhanced, breakable,
+    colback=uzred!8, colframe=uzred,
+    fonttitle=\bfseries\sffamily,
+    title={🚨 Important},
+    left=6pt, right=6pt, top=4pt, bottom=4pt,
+  },
+  exercisestyle/.style={
+    enhanced, breakable,
+    colback=uzgreen!5, colframe=uzgreen,
+    fonttitle=\bfseries\sffamily,
+    title={🎯 Exercise},
+    left=6pt, right=6pt, top=4pt, bottom=4pt,
+  },
+  findingstyle/.style={
+    enhanced, breakable,
+    colback=gray!5, colframe=uzgray,
+    fonttitle=\bfseries\sffamily,
+    title={📋 Finding Template},
+    left=6pt, right=6pt, top=4pt, bottom=4pt,
+  },
+}
+
+% ── Headers & Footers ────────────────────────────────────
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\textcolor{uzgray}{\leftmark}}
+\fancyhead[R]{\small\textcolor{uzgray}{UZYNTRA Security}}
+\fancyfoot[C]{\small\textcolor{uzgray}{\thepage}}
+\fancyfoot[R]{\small\textcolor{uzgray}{Confidential}}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+
+% ── Chapter Title Style ──────────────────────────────────
+\usepackage{titlesec}
+\titleformat{\chapter}[display]
+  {\normalfont\huge\bfseries\color{uzdark}}
+  {\textcolor{uzblue}{\chaptertitlename\ \thechapter}}
+  {10pt}
+  {\Huge}
+  [\vspace{2pt}\textcolor{uzblue}{\titlerule[1.5pt]}]
+
+\titleformat{\section}
+  {\normalfont\Large\bfseries\color{uzdark}}
+  {\textcolor{uzblue}{\thesection}}{1em}{}
+
+\titleformat{\subsection}
+  {\normalfont\large\bfseries\color{uzgray}}
+  {\thesubsection}{1em}{}
+
+% ── Links ────────────────────────────────────────────────
+\usepackage[
+  colorlinks=true,
+  linkcolor=uzblue,
+  urlcolor=uzblue,
+  citecolor=uzblue,
+  bookmarks=true,
+  bookmarksopen=true,
+  pdftitle={Web Application Security Practice Guide},
+  pdfauthor={Muhammad Usama — UZYNTRA Security},
+]{hyperref}
+
+% ── Misc ─────────────────────────────────────────────────
+\usepackage{parskip}
+\usepackage{setspace}
+\onehalfspacing
+\usepackage{lipsum}
+\usepackage{datetime2}
+
+% ── Custom Commands ──────────────────────────────────────
+\newcommand{\noteblock}[1]{\begin{tcolorbox}[notestyle]#1\end{tcolorbox}}
+\newcommand{\warnblock}[1]{\begin{tcolorbox}[warningstyle]#1\end{tcolorbox}}
+\newcommand{\dangerblock}[1]{\begin{tcolorbox}[dangerstyle]#1\end{tcolorbox}}
+\newcommand{\exerciseblock}[1]{\begin{tcolorbox}[exercisestyle]#1\end{tcolorbox}}
+\newcommand{\findingblock}[1]{\begin{tcolorbox}[findingstyle]#1\end{tcolorbox}}
+\newcommand{\screenshotbox}[1]{%
+  \begin{center}
+    \fbox{\begin{minipage}{0.85\textwidth}
+      \centering\vspace{1.5cm}
+      \textcolor{uzgray}{\textit{[Screenshot: #1]}}
+      \vspace{1.5cm}
+    \end{minipage}}
+  \end{center}
+}
+\newcommand{\checkbox}{$\square$\ }
+\newcommand{\checked}{$\boxtimes$\ }
+\newcommand{\cmd}[1]{\texttt{\textcolor{uzblue}{#1}}}
+\newcommand{\vuln}[1]{\textbf{\textcolor{uzred}{#1}}}
+\newcommand{\endpoint}[1]{\texttt{\textcolor{uzgreen}{#1}}}
+\newcommand{\severity}[1]{%
+  \ifthenelse{\equal{#1}{Critical}}{\textbf{\textcolor{uzred}{Critical}}}{}%
+  \ifthenelse{\equal{#1}{High}}{\textbf{\textcolor{uzred}{High}}}{}%
+  \ifthenelse{\equal{#1}{Medium}}{\textbf{\textcolor{uzyellow}{Medium}}}{}%
+  \ifthenelse{\equal{#1}{Low}}{\textbf{\textcolor{uzgreen}{Low}}}{}%
+  \ifthenelse{\equal{#1}{Info}}{\textbf{\textcolor{uzblue}{Informational}}}{}%
+}
+\usepackage{ifthen}
+
+% ============================================================
+% DOCUMENT BEGIN
+% ============================================================
+\begin{document}
+
+% ── Front Matter ─────────────────────────────────────────
+\frontmatter
+\include{chapters/00-cover}
+\tableofcontents
+\listoftables
+\listoffigures
+
+% ── Main Matter ──────────────────────────────────────────
+\mainmatter
+\include{chapters/01-introduction}
+\include{chapters/02-linux-setup}
+\include{chapters/03-burp-setup}
+\include{chapters/04-burp-interface}
+\include{chapters/05-methodology}
+\include{chapters/06-level01-recon}
+\include{chapters/07-level02-authentication}
+\include{chapters/08-level03-authorization}
+\include{chapters/09-level04-injection}
+\include{chapters/10-level05-api}
+\include{chapters/11-level06-clientside}
+\include{chapters/12-level07-bizlogic}
+\include{chapters/13-level08-advanced}
+\include{chapters/14-reporting}
+
+% ── Back Matter ──────────────────────────────────────────
+\backmatter
+\include{chapters/15-references}
+
+\end{document}

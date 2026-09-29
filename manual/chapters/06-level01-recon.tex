@@ -1,0 +1,220 @@
+% ============================================================
+% Chapter 6 — Level 01: Reconnaissance & Information Disclosure
+% ============================================================
+\chapter{Level 01 — Reconnaissance \& Information Disclosure}
+\label{ch:level01}
+
+% ─────────────────────────────────────────────────────────
+\section{Learning Objectives}
+
+By completing this module you will be able to:
+\begin{itemize}
+  \item Perform passive and active reconnaissance using Burp Suite
+  \item Identify information disclosure vulnerabilities (CWE-200, CWE-209)
+  \item Analyse \texttt{robots.txt} for hidden path discovery
+  \item Detect exposed debug and backup endpoints
+  \item Evaluate HTTP response headers for missing security controls
+  \item Map findings to OWASP Top 10 and CWE identifiers
+\end{itemize}
+
+% ─────────────────────────────────────────────────────────
+\section{Vulnerability Explanation}
+
+\subsection{What is Information Disclosure?}
+
+Information disclosure occurs when an application unintentionally reveals sensitive data to users who should not have access to it. This data can be technical (server versions, internal hostnames, source code paths) or sensitive business data (user records, configuration details, credentials).
+
+\subsection{Why It Happens}
+
+\begin{itemize}
+  \item Debug mode left enabled in production
+  \item Verbose error messages returned to users
+  \item Sensitive paths listed in \texttt{robots.txt} (intended for bots, readable by anyone)
+  \item Backup files left in web-accessible directories
+  \item Server banners and version headers not suppressed
+\end{itemize}
+
+\subsection{Real-World Impact}
+
+\begin{table}[H]
+\centering
+\caption{Information disclosure impact}
+\begin{tabularx}{\textwidth}{>{\bfseries}lXl}
+\toprule
+Disclosed Item & Attacker Use & Example \\
+\midrule
+DB hostname & Target internal network & \texttt{db-prod-01.internal.company.com} \\
+Framework version & Find known CVEs & \texttt{Next.js 16.3.7} $\to$ CVE lookup \\
+SQL error + query & Design SQL injection payload & Column names exposed \\
+Stack trace + paths & Plan path traversal & \texttt{/var/www/app/src/} \\
+Config file & Extract credentials & \texttt{DB\_PASS=mypassword} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+% ─────────────────────────────────────────────────────────
+\section{Required Lab Setup}
+
+\begin{table}[H]
+\centering
+\caption{Level 01 Lab Configuration}
+\begin{tabular}{ll}
+\toprule
+Field & Value \\
+\midrule
+Target & \texttt{https://recon.lab.uzyntra.com} \\
+Authentication required & None (unauthenticated testing) \\
+Burp proxy & \texttt{127.0.0.1:8080} \\
+Required tools & Burp Suite Community, Firefox, curl \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\noteblock{All data on \texttt{recon.lab.uzyntra.com} is intentionally fake. No real credentials, hostnames, or personal data are used. This is a controlled training environment.}
+
+% ─────────────────────────────────────────────────────────
+\section{Understanding Normal Application Flow}
+
+Before testing, understand what the application \textit{should} do:
+
+\begin{lstlisting}[style=http, caption={Normal request to homepage}]
+GET / HTTP/1.1
+Host: recon.lab.uzyntra.com
+User-Agent: Mozilla/5.0
+
+HTTP/1.1 200 OK
+Content-Type: text/html
+X-Powered-By: Next.js/16.3.7
+
+<html>... [Company landing page] ...</html>
+\end{lstlisting}
+
+The homepage is intentional. The vulnerabilities are the other endpoints discovered through reconnaissance.
+
+% ─────────────────────────────────────────────────────────
+\section{Burp Suite Testing Process}
+
+\subsection{Step 1 — Configure Burp Proxy}
+Open Burp Suite. Confirm proxy listener on \texttt{127.0.0.1:8080}. Enable FoxyProxy in Firefox.
+
+\textit{Why: All traffic must flow through Burp so requests are logged in HTTP History.}
+
+\subsection{Step 2 — Add Target to Scope}
+\textbf{Target} $\to$ \textbf{Scope settings} $\to$ Add \texttt{https://recon.lab.uzyntra.com}.
+
+\textit{Why: Scoping prevents Burp from logging irrelevant third-party requests.}
+
+\subsection{Step 3 — Fetch robots.txt}
+
+\begin{lstlisting}[style=http, caption={robots.txt request — CWE-538}]
+GET /robots.txt HTTP/1.1
+Host: recon.lab.uzyntra.com
+
+HTTP/1.1 200 OK
+Content-Type: text/plain
+
+User-agent: *
+Disallow: /admin
+Disallow: /backup
+Disallow: /debug
+Disallow: /internal
+\end{lstlisting}
+
+\textit{Result: Attacker now knows 4 sensitive paths without touching the application.}
+
+\subsection{Step 4 — Browse Discovered Paths}
+Visit each Disallow path in Firefox with intercept \textbf{OFF}. All requests log to HTTP History.
+
+\subsection{Step 5 — Analyze /debug Response}
+Send the \texttt{/debug} request to Repeater. Search response for:
+\texttt{Ctrl+F} $\to$ \texttt{internal}, \texttt{host}, \texttt{db}, \texttt{version}
+
+\subsection{Step 6 — Analyze HTTP Headers}
+In HTTP History, click any response $\to$ \textbf{Headers} tab. Document missing headers:
+
+\begin{lstlisting}[style=http, caption={Missing security headers — CWE-693}]
+HTTP/1.1 200 OK
+X-Powered-By: Next.js/16.3.7
+Content-Type: text/html
+
+# MISSING:
+# Content-Security-Policy
+# X-Frame-Options
+# X-Content-Type-Options
+# Strict-Transport-Security
+\end{lstlisting}
+
+% ─────────────────────────────────────────────────────────
+\section{Security Testing Exercise}
+
+\exerciseblock{
+\textbf{Exercise 6.1 — Full Level 01 Recon}\\[4pt]
+\textbf{Scenario:} You have been engaged to perform a web application assessment of \texttt{recon.lab.uzyntra.com}.\\[6pt]
+\textbf{Objective:} Using only Burp Suite Community Edition and a browser, discover and document all information disclosure vulnerabilities.\\[6pt]
+\textbf{Tasks:}
+\begin{enumerate}
+  \item Fetch and analyze \texttt{/robots.txt}
+  \item Visit each Disallow path — note HTTP status code
+  \item Capture \texttt{/debug} in Burp Repeater — list all leaked internal data points
+  \item Capture \texttt{/error-test} — identify SQL columns and server paths from the fake error
+  \item Capture \texttt{/backup} — list all files in the directory listing
+  \item Access \texttt{/admin} — confirm HTTP 200 with no auth challenge
+  \item Fetch \texttt{/lab-info.json} — read the vulnerability catalogue
+  \item Check headers on 3 different pages — list missing security headers
+\end{enumerate}
+\textbf{Deliverable:} Complete the Finding Report template below for at least 3 findings.
+}
+
+% ─────────────────────────────────────────────────────────
+\section{Professional Finding Report}
+
+\findingblock{
+\begin{tabular}{ll}
+\textbf{Finding Title:} & Debug Information Disclosure \\
+\textbf{Severity:} & \textcolor{uzyellow}{\textbf{Medium}} \\
+\textbf{CVSS v3.1:} & 5.3 (AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N) \\
+\textbf{CWE:} & CWE-200 \\
+\textbf{OWASP:} & A05:2021 — Security Misconfiguration \\
+\textbf{Affected Endpoint:} & \texttt{GET /debug} \\
+\end{tabular}\\[8pt]
+\textbf{Description:}\\
+The \texttt{/debug} endpoint is accessible without authentication and returns detailed internal application information including database hostname, framework version, process ID, and internal service addresses.\\[6pt]
+\textbf{Evidence:}\\
+\begin{lstlisting}[style=http]
+GET /debug HTTP/1.1
+Host: recon.lab.uzyntra.com
+
+HTTP/2 200 OK
+...
+db.host: db-prod-01.internal.uzyntra.com
+db.type: PostgreSQL 15.3
+services.cache: Redis @ cache-01.internal:6379
+\end{lstlisting}
+\textbf{Impact:}\\
+An unauthenticated attacker learns the full internal network topology and technology stack, enabling targeted exploitation of known CVEs and reducing attack planning effort.\\[6pt]
+\textbf{Recommendation:}\\
+1. Remove the \texttt{/debug} endpoint from the production codebase entirely.\\
+2. If required for operations, restrict access to VPN IP range only.\\
+3. Set \texttt{NODE\_ENV=production} — suppresses debug output automatically.
+}
+
+% ─────────────────────────────────────────────────────────
+\section{Module Completion Checklist}
+
+\begin{tcolorbox}[findingstyle, title={Level 01 Burp Checklist}]
+\begin{itemize}
+  \item[\checkbox] Target added to Burp scope
+  \item[\checkbox] Proxy configured and CA certificate installed
+  \item[\checkbox] \texttt{/robots.txt} fetched and all Disallow paths noted
+  \item[\checkbox] Each Disallow path visited — HTTP status codes recorded
+  \item[\checkbox] \texttt{/debug} response captured — all leaked fields documented
+  \item[\checkbox] \texttt{/error-test} response analyzed — SQL query and stack trace extracted
+  \item[\checkbox] \texttt{/backup} directory listing reviewed — all files identified
+  \item[\checkbox] \texttt{/admin} accessed — confirmed HTTP 200 with no authentication
+  \item[\checkbox] \texttt{/internal} accessed — internal hostnames and IPs noted
+  \item[\checkbox] \texttt{/lab-info.json} fetched — vulnerability catalogue read
+  \item[\checkbox] HTTP response headers checked — missing headers documented
+  \item[\checkbox] Findings documented with request/response evidence
+  \item[\checkbox] Report template completed for minimum 3 findings
+\end{itemize}
+\end{tcolorbox}

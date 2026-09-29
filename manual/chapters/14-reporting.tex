@@ -1,0 +1,153 @@
+% ============================================================
+% Chapter 14 — Reporting Methodology
+% ============================================================
+\chapter{Reporting Methodology}
+\label{ch:reporting}
+
+\noteblock{A penetration test is only as valuable as its report. A well-written report translates technical findings into business risk, enabling developers and management to understand and prioritize remediation.}
+
+% ─────────────────────────────────────────────────────────
+\section{Report Structure}
+
+A professional penetration test report consists of two parts:
+
+\begin{enumerate}
+  \item \textbf{Executive Summary} — for management: business risk, severity overview, key recommendations
+  \item \textbf{Technical Findings} — for developers: vulnerability details, evidence, remediation steps
+\end{enumerate}
+
+% ─────────────────────────────────────────────────────────
+\section{Severity Classification}
+
+Always use a consistent severity classification system. CVSS v3.1 is the industry standard.
+
+\begin{table}[H]
+\centering
+\caption{Severity classification}
+\begin{tabularx}{\textwidth}{>{\bfseries}lXll}
+\toprule
+Severity & Description & CVSS Range & Remediate Within \\
+\midrule
+Critical & Immediate full compromise possible & 9.0--10.0 & 24--48 hours \\
+High & Significant risk, likely to be exploited & 7.0--8.9 & 1 week \\
+Medium & Exploitable with some conditions & 4.0--6.9 & 1 month \\
+Low & Limited impact, low exploitability & 0.1--3.9 & 3 months \\
+Informational & No direct risk, best practice & N/A & Next review cycle \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+% ─────────────────────────────────────────────────────────
+\section{Finding Report Format}
+
+Every finding must include the following fields:
+
+\findingblock{
+\begin{tabular}{ll}
+\textbf{Finding Title:} & [Short, descriptive name] \\
+\textbf{Severity:} & Critical / High / Medium / Low / Informational \\
+\textbf{CVSS v3.1 Score:} & [X.X] \\
+\textbf{CVSS Vector:} & [AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:N] \\
+\textbf{CWE:} & CWE-XXX \\
+\textbf{OWASP:} & A0X:2021 \\
+\textbf{Affected Component:} & [URL, endpoint, parameter] \\
+\textbf{Discovered:} & [Date] \\
+\end{tabular}\\[8pt]
+
+\textbf{Description:}\\
+[2--4 sentences explaining the vulnerability in plain English. Assume the reader is a developer, not a security expert.]\\[6pt]
+
+\textbf{Steps to Reproduce:}\\
+1. [Step 1]\\
+2. [Step 2]\\
+3. [Step 3]\\[6pt]
+
+\textbf{Evidence:}\\
+[Include the exact HTTP request and response from Burp Suite]\\
+\begin{lstlisting}[style=http]
+REQUEST:
+GET /vulnerable-endpoint?param=payload HTTP/1.1
+Host: target.com
+Authorization: Bearer <token>
+
+RESPONSE:
+HTTP/1.1 200 OK
+[Response showing vulnerability evidence]
+\end{lstlisting}
+
+\textbf{Impact:}\\
+[Business impact — what can an attacker achieve? Be specific: data exfiltration, account takeover, financial loss.]\\[6pt]
+
+\textbf{Recommendation:}\\
+[Actionable, specific remediation steps. Reference secure coding patterns.]\\[6pt]
+
+\textbf{References:}\\
+{[}OWASP link{]}, {[}CWE link{]}, {[}CVE if applicable{]}
+}
+
+% ─────────────────────────────────────────────────────────
+\section{Executive Summary Template}
+
+\begin{tcolorbox}[findingstyle, title={Executive Summary Template}]
+\textbf{Assessment Overview}\\[4pt]
+A web application security assessment was conducted against \texttt{[target]} between \texttt{[start date]} and \texttt{[end date]}. The assessment identified \texttt{[N]} vulnerabilities across \texttt{[N]} endpoints.\\[6pt]
+
+\textbf{Risk Summary}\\[4pt]
+\begin{tabular}{ll}
+Critical: & [N] \\
+High: & [N] \\
+Medium: & [N] \\
+Low: & [N] \\
+Informational: & [N] \\
+\textbf{Overall Risk:} & \textbf{[Critical/High/Medium/Low]} \\
+\end{tabular}\\[6pt]
+
+\textbf{Key Findings}\\[4pt]
+The most significant findings were:
+\begin{itemize}
+  \item [Finding 1 in one sentence]
+  \item [Finding 2 in one sentence]
+  \item [Finding 3 in one sentence]
+\end{itemize}
+
+\textbf{Immediate Actions Required}\\[4pt]
+The following must be addressed before the next production deployment:
+\begin{itemize}
+  \item [Critical action 1]
+  \item [Critical action 2]
+\end{itemize}
+\end{tcolorbox}
+
+% ─────────────────────────────────────────────────────────
+\section{Evidence Collection Best Practices}
+
+\begin{itemize}
+  \item \textbf{Always capture the full HTTP request and response} — partial evidence is insufficient
+  \item \textbf{Use Burp's copy-as-curl} for easily reproducible PoC commands
+  \item \textbf{Include timestamps} — important for proving the finding occurred at a specific time
+  \item \textbf{Never alter real data} — use test accounts and synthetic payloads only
+  \item \textbf{Document the testing account} — which account was used to find each issue
+  \item \textbf{Save Burp project files} (Pro) or export HTTP logs (Community) as backup evidence
+\end{itemize}
+
+% ─────────────────────────────────────────────────────────
+\section{Remediation Verification}
+
+After developers apply fixes, the tester should retest each finding:
+
+\begin{table}[H]
+\centering
+\caption{Remediation verification outcomes}
+\begin{tabularx}{\textwidth}{>{\bfseries}lX}
+\toprule
+Outcome & Action \\
+\midrule
+Fixed & Mark as \textbf{Resolved} — document the retest date and result \\
+Partially fixed & Mark as \textbf{Partially Remediated} — document what remains \\
+Not fixed & Mark as \textbf{Open} — escalate if critical \\
+Introduced new issue & Document as \textbf{New Finding} — log separately \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\warnblock{Retesting should use the same methodology as the original test. A finding should only be marked resolved if the tester has confirmed the exact original exploit no longer works — not just because the developer says it is fixed.}

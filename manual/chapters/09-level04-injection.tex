@@ -1,0 +1,93 @@
+% ============================================================
+% Chapter 9 — Level 04: Injection Testing
+% ============================================================
+\chapter{Level 04 — Injection Testing}
+\label{ch:level04}
+
+\noteblock{This module is a \textbf{placeholder}. Lab: \texttt{https://sqli.lab.uzyntra.com} (pending deployment).}
+
+\section{Learning Objectives}
+\begin{itemize}
+  \item Understand SQL Injection concepts and why it occurs
+  \item Identify SQL injection points in a web application
+  \item Perform manual SQL injection testing with Burp Suite
+  \item Understand input validation and secure query patterns
+\end{itemize}
+
+\section{Vulnerability Explanation}
+
+SQL Injection occurs when user-supplied input is incorporated into a database query without proper sanitization. The attacker's input changes the logic of the query.
+
+\subsection{Why It Happens}
+
+\begin{lstlisting}[style=code, language=SQL, caption={Vulnerable query construction}]
+-- VULNERABLE: string concatenation
+query = "SELECT * FROM users WHERE username = '" + username + "'";
+
+-- Attacker input: admin' --
+-- Resulting query:
+SELECT * FROM users WHERE username = 'admin' --'
+-- The '--' comments out the password check!
+\end{lstlisting}
+
+\begin{lstlisting}[style=code, language=SQL, caption={Secure parameterized query}]
+-- SECURE: parameterized query
+query = "SELECT * FROM users WHERE username = ?";
+statement.setParameter(1, username);
+-- User input is treated as data, never as SQL code
+\end{lstlisting}
+
+\subsection{Types of SQL Injection}
+
+\begin{table}[H]
+\centering
+\caption{SQL injection types}
+\begin{tabularx}{\textwidth}{>{\bfseries}lX}
+\toprule
+Type & Description \\
+\midrule
+Classic (In-band) & Error or query result returned directly in response \\
+Blind Boolean & No visible output — true/false conditions reveal data \\
+Blind Time-Based & Response delays reveal data (\texttt{SLEEP(5)}) \\
+UNION-Based & UNION statement extracts data from other tables \\
+Error-Based & Error messages leak database content \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{Burp Suite Testing Process}
+
+\subsection{Identifying Injection Points}
+\begin{enumerate}
+  \item Browse application with Burp proxy on
+  \item In HTTP History, identify requests with parameters: \texttt{id=}, \texttt{search=}, \texttt{user=}
+  \item Send to Repeater
+  \item Add a single quote \texttt{'} to the parameter value
+  \item If application returns a SQL error $\to$ injection point confirmed
+\end{enumerate}
+
+\begin{lstlisting}[style=http, caption={SQL injection test in Repeater}]
+# Original request:
+GET /search?q=laptop HTTP/1.1
+
+# Modified (inject single quote):
+GET /search?q=laptop' HTTP/1.1
+
+# Vulnerable response:
+HTTP/1.1 500 Internal Server Error
+{"error": "You have an error in your SQL syntax near 'laptop'' at line 1"}
+\end{lstlisting}
+
+\section{Module Completion Checklist}
+
+\begin{tcolorbox}[findingstyle, title={Level 04 Burp Checklist}]
+\begin{itemize}
+  \item[\checkbox] All parameters with user input identified
+  \item[\checkbox] Single quote test applied to each parameter
+  \item[\checkbox] SQL error responses identified and documented
+  \item[\checkbox] UNION SELECT attempted to identify column count
+  \item[\checkbox] Blind injection tested with true/false conditions
+  \item[\checkbox] Database version extracted from error or UNION
+  \item[\checkbox] All findings documented with full request/response evidence
+\end{itemize}
+\end{tcolorbox}

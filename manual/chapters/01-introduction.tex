@@ -1,0 +1,196 @@
+% ============================================================
+% Chapter 1 — Introduction to Web Application Security
+% ============================================================
+\chapter{Introduction to Web Application Security}
+\label{ch:intro}
+
+\noteblock{This chapter is designed for absolute beginners. No prior security knowledge is required. Read through carefully before moving to any hands-on chapters.}
+
+% ─────────────────────────────────────────────────────────
+\section{What is Web Application Security?}
+
+A \textbf{web application} is any software that runs in a browser — online banking portals, social media platforms, e-commerce stores, admin dashboards, and APIs that power mobile apps. These applications handle highly sensitive data: passwords, payment details, personal information, and confidential business records.
+
+\textbf{Web application security} is the discipline of identifying, understanding, and fixing weaknesses in web applications that could allow an attacker to:
+
+\begin{itemize}[leftmargin=*]
+  \item Access data they are not authorized to see
+  \item Modify or delete data belonging to others
+  \item Impersonate other users (including administrators)
+  \item Take over the underlying server
+  \item Disrupt the application's availability
+\end{itemize}
+
+\noteblock{Think of a web application as a building. Web application security is the process of checking every door, window, lock, and alarm system — before a burglar does.}
+
+% ─────────────────────────────────────────────────────────
+\section{Why Organizations Perform Penetration Testing}
+
+Organizations spend significant money building secure applications, yet breaches happen constantly. The reason is simple: \textit{developers are not attackers}. Penetration testing (pen testing) closes this gap by employing skilled professionals who think and act like real attackers — but with written authorization.
+
+\begin{table}[H]
+\centering
+\caption{Business reasons for penetration testing}
+\begin{tabularx}{\textwidth}{>{\bfseries}lX}
+\toprule
+Reason & Explanation \\
+\midrule
+Risk Reduction & Find vulnerabilities before real attackers exploit them \\
+Compliance & PCI-DSS, ISO 27001, SOC 2 require regular pen tests \\
+Customer Trust & Demonstrates commitment to protecting customer data \\
+Incident Prevention & A single breach can cost millions and destroy reputation \\
+Developer Feedback & Gives development teams real attack scenarios to learn from \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+% ─────────────────────────────────────────────────────────
+\section{Vulnerability Assessment vs Penetration Testing}
+
+These two terms are often confused. They are related but fundamentally different.
+
+\begin{table}[H]
+\centering
+\caption{Vulnerability Assessment vs Penetration Testing}
+\begin{tabularx}{\textwidth}{>{\bfseries}lXX}
+\toprule
+Attribute & Vulnerability Assessment & Penetration Testing \\
+\midrule
+Goal & Identify vulnerabilities & Exploit vulnerabilities \\
+Depth & Broad scan & Deep, targeted \\
+Automation & Mostly automated tools & Manual + automated \\
+Risk & Lower (non-exploiting) & Higher (active exploitation) \\
+Output & List of vulnerabilities & Proof of exploitation \\
+Time & Hours & Days to weeks \\
+Use case & Regular scanning & Pre-launch, compliance \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\noteblock{A \textbf{vulnerability assessment} tells you \textit{what might be wrong}. A \textbf{penetration test} proves \textit{what can actually be exploited} and shows the real business impact.}
+
+% ─────────────────────────────────────────────────────────
+\section{Authorized vs Unauthorized Testing}
+
+\dangerblock{
+\textbf{Testing any system without explicit written authorization is illegal.}\\[4pt]
+Most countries — including the UK (Computer Misuse Act), USA (CFAA), and EU member states — impose criminal penalties including imprisonment for unauthorized computer access, regardless of intent.\\[6pt]
+This guide covers both authorized lab practice and the techniques attackers use in the wild. Understanding unauthorized attack techniques is essential for defenders. However, you must \textbf{only practice on systems you own or have written permission to test}.
+}
+
+\subsection{Authorized Testing}
+
+Authorized testing (legitimate penetration testing) always involves:
+
+\begin{enumerate}[leftmargin=*]
+  \item \textbf{Rules of Engagement} — written document defining scope, methods, and time window
+  \item \textbf{Scope Definition} — exact list of IP addresses, domains, and endpoints in scope
+  \item \textbf{Emergency Contacts} — who to call if testing causes unintended impact
+  \item \textbf{Safe Harbors} — legal protection clauses for the tester
+  \item \textbf{Deliverable Agreement} — what report format and findings will be provided
+\end{enumerate}
+
+\subsection{Unauthorized Testing (What NOT to Do)}
+
+Unauthorized testing includes:
+
+\begin{itemize}[leftmargin=*]
+  \item Running scanners against websites you do not own
+  \item Testing a production system beyond the agreed scope
+  \item Using discovered credentials to access other systems
+  \item Accessing, copying, or exfiltrating real data — even if accidentally discovered
+\end{itemize}
+
+\warnblock{Even if you are ``just testing'' or ``trying to help'', unauthorized testing can result in criminal charges. Always get written authorization first.}
+
+% ─────────────────────────────────────────────────────────
+\section{Security Testing Methodology}
+
+Professional penetration testers follow a structured methodology. This guide uses the following phases throughout all attack modules:
+
+\begin{table}[H]
+\centering
+\caption{Web Application Penetration Testing Phases}
+\begin{tabularx}{\textwidth}{>{\bfseries}clX}
+\toprule
+Phase & Name & Description \\
+\midrule
+1 & Reconnaissance & Gather information about the target without attacking \\
+2 & Scanning \& Enumeration & Map endpoints, parameters, and technologies \\
+3 & Vulnerability Identification & Identify potentially exploitable weaknesses \\
+4 & Exploitation & Attempt to exploit identified vulnerabilities \\
+5 & Post-Exploitation & Understand impact and access depth \\
+6 & Reporting & Document all findings with evidence and remediation \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+% ─────────────────────────────────────────────────────────
+\section{OWASP Top 10 Overview}
+\label{sec:owasp}
+
+The \textbf{OWASP Top 10} is the most widely referenced list of critical web application security risks, maintained by the Open Web Application Security Project. All attack modules in this guide map to OWASP categories.
+
+\begin{table}[H]
+\centering
+\caption{OWASP Top 10 (2021)}
+\begin{tabularx}{\textwidth}{>{\bfseries}clX}
+\toprule
+ID & Category & Summary \\
+\midrule
+A01 & Broken Access Control & Users can act outside their intended permissions \\
+A02 & Cryptographic Failures & Weak or missing encryption exposes sensitive data \\
+A03 & Injection & Untrusted data sent to an interpreter as a command \\
+A04 & Insecure Design & Flaws in the architectural design of the application \\
+A05 & Security Misconfiguration & Insecure default configurations, exposed debug info \\
+A06 & Vulnerable Components & Using libraries/frameworks with known vulnerabilities \\
+A07 & Authentication Failures & Broken login, session management, or MFA issues \\
+A08 & Software Integrity Failures & Unverified software updates or CI/CD pipeline attacks \\
+A09 & Logging Failures & Insufficient logging prevents detection of attacks \\
+A10 & Server-Side Request Forgery & Server fetches attacker-controlled URLs \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{A01 — Broken Access Control}
+The most common OWASP finding. Users perform actions or access data beyond their authorized permissions. Examples: accessing \texttt{/admin} without login, reading another user's files by changing an ID parameter.
+
+\subsection{A02 — Cryptographic Failures}
+Sensitive data transmitted or stored without proper encryption. Examples: passwords stored as plain MD5, credit card numbers sent over HTTP, weak JWT secrets.
+
+\subsection{A03 — Injection}
+The application passes untrusted user input to an interpreter (SQL, OS, LDAP). The interpreter executes the input as a command. SQL Injection is the most well-known example.
+
+\subsection{A04 — Insecure Design}
+Security flaws baked into the architecture. No amount of patching fixes a fundamentally broken design. Example: a password reset flow that does not verify ownership of the email address.
+
+\subsection{A05 — Security Misconfiguration}
+Default credentials, verbose error messages, exposed debug endpoints, open cloud storage buckets, missing security headers. This is what Level 01 of this course focuses on.
+
+\subsection{A06 — Vulnerable Components}
+Using outdated libraries, frameworks, or OS packages with known CVEs. A single vulnerable npm package in a Node.js application can expose the entire server.
+
+\subsection{A07 — Authentication Failures}
+Weak passwords permitted, no brute-force protection, session tokens not invalidated on logout, predictable session IDs. Level 02 covers these in depth.
+
+\subsection{A08 — Software Integrity Failures}
+Applications that auto-update without verifying signatures, or CI/CD pipelines that can be compromised to inject malicious code into production builds.
+
+\subsection{A09 — Logging \& Monitoring Failures}
+Without detailed logs, attackers operate invisibly. Failed login storms, IDOR probes, and SQL injection attempts should all trigger alerts.
+
+\subsection{A10 — Server-Side Request Forgery (SSRF)}
+The server makes HTTP requests to attacker-controlled URLs. Attackers use this to reach internal services, AWS metadata endpoints, and internal databases not exposed to the internet.
+
+\exerciseblock{
+\textbf{Exercise 1.1 — OWASP Mapping}\\[4pt]
+For each of the following scenarios, identify the OWASP A0X:2021 category:
+\begin{enumerate}
+  \item A URL parameter \texttt{?user\_id=123} can be changed to \texttt{?user\_id=124} to view another user's profile
+  \item An application returns a full SQL error including the query text
+  \item The \texttt{/admin} panel is accessible without logging in
+  \item An old version of \texttt{log4j} is used in the application backend
+  \item The application has no rate limiting on the login endpoint
+\end{enumerate}
+\textit{Answers: IDOR/A01, A05, A01, A06, A07}
+}

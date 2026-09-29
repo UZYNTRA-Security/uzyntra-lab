@@ -1,0 +1,92 @@
+% ============================================================
+% Chapter 15 — References
+% ============================================================
+\chapter*{References}
+\addcontentsline{toc}{chapter}{References}
+\label{ch:references}
+
+% ─────────────────────────────────────────────────────────
+\section*{Primary References}
+
+\begin{enumerate}
+
+\item \textbf{OWASP Web Security Testing Guide (WSTG)}\\
+The definitive guide for web application penetration testing methodology.\\
+\url{https://owasp.org/www-project-web-security-testing-guide/}
+
+\item \textbf{OWASP Top 10 (2021)}\\
+The most critical web application security risks.\\
+\url{https://owasp.org/www-project-top-ten/}
+
+\item \textbf{PortSwigger Web Security Academy}\\
+Free, world-class web security training with interactive labs.\\
+\url{https://portswigger.net/web-security}
+
+\item \textbf{PortSwigger Burp Suite Documentation}\\
+Official documentation for all Burp Suite features.\\
+\url{https://portswigger.net/burp/documentation}
+
+\item \textbf{MITRE CWE — Common Weakness Enumeration}\\
+Comprehensive list of software and hardware weakness types.\\
+\url{https://cwe.mitre.org/}
+
+\item \textbf{CVSS v3.1 Specification}\\
+Common Vulnerability Scoring System — severity classification standard.\\
+\url{https://www.first.org/cvss/specification-document}
+
+\item \textbf{OWASP API Security Top 10}\\
+Top 10 API security risks including BOLA, broken authentication, and SSRF.\\
+\url{https://owasp.org/www-project-api-security/}
+
+\end{enumerate}
+
+% ─────────────────────────────────────────────────────────
+\section*{Tools Referenced}
+
+\begin{table}[H]
+\centering
+\begin{tabularx}{\textwidth}{>{\bfseries}lX}
+\toprule
+Tool & URL \\
+\midrule
+Burp Suite & \url{https://portswigger.net/burp} \\
+Kali Linux & \url{https://www.kali.org} \\
+SecLists & \url{https://github.com/danielmiessler/SecLists} \\
+OWASP ZAP & \url{https://www.zaproxy.org} \\
+Gobuster & \url{https://github.com/OJ/gobuster} \\
+Nikto & \url{https://cirt.net/Nikto2} \\
+sqlmap & \url{https://sqlmap.org} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+% ─────────────────────────────────────────────────────────
+\section*{UZYNTRA Security Lab Environments}
+
+\begin{table}[H]
+\centering
+\begin{tabularx}{\textwidth}{>{\bfseries}lXl}
+\toprule
+Module & Domain & Status \\
+\midrule
+Level 01 — Recon & \texttt{recon.lab.uzyntra.com} & Live \\
+Level 02 — Authentication & \texttt{auth.lab.uzyntra.com} & Pending \\
+Level 03 — Authorization & \texttt{authz.lab.uzyntra.com} & Pending \\
+Level 04 — Injection & \texttt{sqli.lab.uzyntra.com} & Pending \\
+Level 05 — API Security & \texttt{api.lab.uzyntra.com} & Pending \\
+Level 06 — Client-Side & \texttt{xss.lab.uzyntra.com} & Pending \\
+Level 07 — Business Logic & \texttt{logic.lab.uzyntra.com} & Pending \\
+Level 08 — Advanced & \texttt{advanced.lab.uzyntra.com} & Pending \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\vfill
+
+\begin{center}
+{\color{uzgray}\rule{0.6\textwidth}{0.4pt}}\\[8pt]
+\textit{UZYNTRA Security — Web Application Security Practice Guide}\\
+\textit{Prepared by Muhammad Usama}\\
+\textit{Version 1.0.0 — \DTMtoday}\\[4pt]
+{\small\textcolor{uzgray}{This document is for authorized training use only. All lab environments use intentionally fake data.}}
+\end{center}

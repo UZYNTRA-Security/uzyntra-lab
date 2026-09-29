@@ -1,0 +1,80 @@
+% ============================================================
+% Chapter 10 — Level 05: API Security Testing
+% ============================================================
+\chapter{Level 05 — API Security Testing}
+\label{ch:level05}
+
+\noteblock{This module is a \textbf{placeholder}. Lab: \texttt{https://api.lab.uzyntra.com} (pending deployment).}
+
+\section{Learning Objectives}
+\begin{itemize}
+  \item Understand RESTful API authentication mechanisms
+  \item Test API authorization flaws and broken object-level access control
+  \item Analyze JWT tokens for weaknesses
+  \item Test API rate limiting and mass assignment vulnerabilities
+\end{itemize}
+
+\section{Vulnerability Explanations}
+
+\subsection{API Authentication Weaknesses}
+
+\begin{table}[H]
+\centering
+\caption{API authentication vulnerabilities}
+\begin{tabularx}{\textwidth}{>{\bfseries}lX}
+\toprule
+Vulnerability & Description \\
+\midrule
+No authentication & API endpoints accessible without any token \\
+Broken token validation & Token accepted regardless of signature validity \\
+JWT \texttt{alg:none} & Token with no signature accepted \\
+Weak JWT secret & Secret brute-forceable with hashcat/jwt-cracker \\
+Token not expiring & JWT valid indefinitely \\
+API key in URL & \texttt{?api\_key=xxx} — logged in server access logs \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{JWT Analysis}
+
+JWT tokens have three parts separated by dots: \texttt{header.payload.signature}
+
+\begin{lstlisting}[style=terminal, caption={Decode a JWT in Burp Decoder}]
+# Example JWT:
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEyMywicm9sZSI6InVzZXIifQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+
+# Header (Base64URL decode):
+{"alg":"HS256","typ":"JWT"}
+
+# Payload (Base64URL decode):
+{"userId":123,"role":"user"}
+
+# Attack: change role to admin, set alg to none, remove signature
+eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJ1c2VySWQiOjEyMywicm9sZSI6ImFkbWluIn0.
+\end{lstlisting}
+
+\section{Burp Suite Testing Process}
+
+\begin{enumerate}
+  \item Capture API requests in HTTP History
+  \item Identify Authorization header format: \texttt{Bearer <token>}
+  \item Send token to Decoder $\to$ Base64URL decode payload
+  \item Look for privilege fields: \texttt{role}, \texttt{isAdmin}, \texttt{scope}
+  \item In Repeater: modify payload, re-encode, send modified token
+  \item Check if server validates signature or accepts modified token
+\end{enumerate}
+
+\section{Module Completion Checklist}
+
+\begin{tcolorbox}[findingstyle, title={Level 05 Burp Checklist}]
+\begin{itemize}
+  \item[\checkbox] All API endpoints mapped in Burp Site Map
+  \item[\checkbox] Authentication headers captured (Bearer, API Key, Basic)
+  \item[\checkbox] JWT decoded in Decoder — payload fields documented
+  \item[\checkbox] JWT \texttt{alg:none} attack attempted
+  \item[\checkbox] API endpoints tested without Authorization header
+  \item[\checkbox] Rate limiting tested (100 rapid requests)
+  \item[\checkbox] Mass assignment tested (add extra fields to POST body)
+  \item[\checkbox] All findings documented
+\end{itemize}
+\end{tcolorbox}

@@ -1,0 +1,328 @@
+% ============================================================
+% Chapter 2 — Linux Preparation Guide
+% ============================================================
+\chapter{Linux Preparation Guide}
+\label{ch:linux}
+
+\noteblock{This chapter targets Kali Linux users. Kali is a Debian-based distribution purpose-built for penetration testing. All commands in this guide assume Kali Linux 2024.x or later.}
+
+% ─────────────────────────────────────────────────────────
+\section{Installing Kali Linux}
+
+\subsection{Download}
+
+Download the official Kali Linux ISO from \url{https://www.kali.org/get-kali/}
+
+\begin{table}[H]
+\centering
+\caption{Recommended Kali Linux installation options}
+\begin{tabularx}{\textwidth}{>{\bfseries}lX}
+\toprule
+Option & Use Case \\
+\midrule
+Installer ISO & Dedicated machine or dual-boot \\
+Virtual Machine (OVA) & VirtualBox or VMware — recommended for beginners \\
+WSL2 (Windows) & Lightweight terminal-only option for Windows users \\
+Live Boot (USB) & No installation required, runs from USB \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\warnblock{Always download from \textbf{kali.org} only. Verify the SHA256 checksum of the ISO before installing. Never trust third-party mirrors for security tools.}
+
+\subsection{Recommended Minimum Specifications}
+
+\begin{table}[H]
+\centering
+\caption{Minimum hardware for Kali Linux}
+\begin{tabular}{ll}
+\toprule
+Component & Minimum \\
+\midrule
+RAM & 4 GB (8 GB recommended) \\
+Disk & 20 GB (50 GB recommended) \\
+CPU & 2 cores (4 cores recommended) \\
+Network & Internet access required \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ─────────────────────────────────────────────────────────
+\section{Updating Kali Linux}
+
+After installation, always update before any testing. Running outdated tools may produce inaccurate results or expose you to vulnerabilities in the tools themselves.
+
+\subsection{Command: \texttt{sudo apt update}}
+
+\begin{lstlisting}[style=terminal, caption={Update the package list}]
+sudo apt update
+\end{lstlisting}
+
+\begin{table}[H]
+\centering
+\caption{Command explanation: sudo apt update}
+\begin{tabularx}{\textwidth}{>{\bfseries}lX}
+\toprule
+Field & Detail \\
+\midrule
+Purpose & Downloads the latest package index from Kali repositories \\
+What it does & Refreshes the list of available packages and their versions — does NOT install anything \\
+Expected result & Lines like: \texttt{Hit:1 http://kali.download/kali kali-rolling InRelease} \\
+Run as & Root (sudo required) \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\textbf{Troubleshooting:}
+\begin{itemize}
+  \item \texttt{Could not resolve 'kali.download'} — check internet connection: \cmd{ping 8.8.8.8}
+  \item \texttt{Permission denied} — ensure you prefix with \cmd{sudo}
+  \item \texttt{Waiting for lock} — another apt process is running; wait and retry
+\end{itemize}
+
+\subsection{Command: \texttt{sudo apt upgrade}}
+
+\begin{lstlisting}[style=terminal, caption={Upgrade installed packages}]
+sudo apt upgrade -y
+\end{lstlisting}
+
+\begin{table}[H]
+\centering
+\caption{Command explanation: sudo apt upgrade}
+\begin{tabularx}{\textwidth}{>{\bfseries}lX}
+\toprule
+Field & Detail \\
+\midrule
+Purpose & Installs newer versions of all currently installed packages \\
+What it does & Downloads and installs updates without removing any existing packages \\
+Expected result & Summary showing number of packages upgraded \\
+Flag \texttt{-y} & Automatically answers ``yes'' to all prompts \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Command: \texttt{sudo apt full-upgrade}}
+
+\begin{lstlisting}[style=terminal, caption={Full system upgrade}]
+sudo apt full-upgrade -y
+\end{lstlisting}
+
+\begin{table}[H]
+\centering
+\caption{Command explanation: sudo apt full-upgrade}
+\begin{tabularx}{\textwidth}{>{\bfseries}lX}
+\toprule
+Field & Detail \\
+\midrule
+Purpose & Performs a complete system upgrade including dependency changes \\
+What it does & May install new packages or remove obsolete ones to satisfy dependencies \\
+When to use & Recommended over \texttt{upgrade} for Kali — handles kernel and major tool updates \\
+Expected result & System fully up to date; possible reboot prompt for kernel updates \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\noteblock{Run the full update sequence in order: \cmd{apt update} → \cmd{apt upgrade} → \cmd{apt full-upgrade}. Skipping \texttt{update} first will upgrade to outdated cached versions.}
+
+\subsection{Verify System Status}
+
+\begin{lstlisting}[style=terminal, caption={Check system is up to date}]
+# Check Kali version
+cat /etc/os-release
+
+# Check last update time
+stat /var/lib/apt/periodic/update-success-stamp
+
+# Check available updates (without installing)
+apt list --upgradable 2>/dev/null
+\end{lstlisting}
+
+% ─────────────────────────────────────────────────────────
+\section{Installing Required Tools}
+
+\subsection{Burp Suite Community Edition}
+
+\begin{lstlisting}[style=terminal, caption={Install Burp Suite on Kali}]
+sudo apt install burpsuite -y
+\end{lstlisting}
+
+\begin{table}[H]
+\centering
+\caption{Burp Suite installation details}
+\begin{tabularx}{\textwidth}{>{\bfseries}lX}
+\toprule
+Field & Detail \\
+\midrule
+Purpose & The primary web application security testing proxy \\
+Expected result & Burp Suite appears in Applications $\to$ Web Application Analysis \\
+Launch command & \texttt{burpsuite} in terminal or click application icon \\
+Troubleshooting & If not found: \texttt{sudo apt install default-jdk} (Java required) \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Firefox}
+
+\begin{lstlisting}[style=terminal, caption={Install Firefox ESR}]
+sudo apt install firefox-esr -y
+\end{lstlisting}
+
+\noteblock{Firefox ESR is recommended over Chromium for Burp Suite use. It offers better proxy configuration control and FoxyProxy extension support.}
+
+\subsection{curl}
+
+\begin{lstlisting}[style=terminal, caption={Install and verify curl}]
+sudo apt install curl -y
+curl --version
+\end{lstlisting}
+
+\begin{table}[H]
+\centering
+\caption{curl details}
+\begin{tabularx}{\textwidth}{>{\bfseries}lX}
+\toprule
+Field & Detail \\
+\midrule
+Purpose & Command-line HTTP client for quick endpoint testing \\
+Expected result & \texttt{curl 8.x.x} with supported protocols listed \\
+Common use & \texttt{curl -I https://target.com} to check headers \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{wget}
+
+\begin{lstlisting}[style=terminal, caption={Install wget}]
+sudo apt install wget -y
+\end{lstlisting}
+
+\begin{table}[H]
+\centering
+\begin{tabularx}{\textwidth}{>{\bfseries}lX}
+\toprule
+Field & Detail \\
+\midrule
+Purpose & Download files from URLs — useful for fetching wordlists, tools \\
+Example & \texttt{wget https://example.com/file.zip} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{git}
+
+\begin{lstlisting}[style=terminal, caption={Install git}]
+sudo apt install git -y
+git --version
+\end{lstlisting}
+
+\begin{table}[H]
+\centering
+\begin{tabularx}{\textwidth}{>{\bfseries}lX}
+\toprule
+Field & Detail \\
+\midrule
+Purpose & Clone security tool repositories from GitHub \\
+Example & \texttt{git clone https://github.com/danielmiessler/SecLists.git} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Python 3}
+
+\begin{lstlisting}[style=terminal, caption={Install Python 3 and pip}]
+sudo apt install python3 python3-pip -y
+python3 --version
+pip3 --version
+\end{lstlisting}
+
+\noteblock{Python 3 is pre-installed on Kali. You mainly need pip to install security-related Python packages like \texttt{requests}, \texttt{pwntools}, \texttt{impacket}.}
+
+\subsection{Docker}
+
+\begin{lstlisting}[style=terminal, caption={Install Docker for running lab containers}]
+sudo apt install docker.io -y
+sudo systemctl enable docker
+sudo systemctl start docker
+sudo usermod -aG docker $USER
+docker --version
+\end{lstlisting}
+
+\begin{table}[H]
+\centering
+\caption{Docker installation steps explained}
+\begin{tabularx}{\textwidth}{>{\bfseries}lX}
+\toprule
+Command & Purpose \\
+\midrule
+\texttt{install docker.io} & Installs Docker from Kali repository \\
+\texttt{systemctl enable} & Auto-start Docker on boot \\
+\texttt{systemctl start} & Start Docker service now \\
+\texttt{usermod -aG docker} & Allow current user to run Docker without sudo \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\warnblock{Log out and back in after \texttt{usermod} for group changes to take effect. Without this, you will get \texttt{permission denied} errors running Docker commands.}
+
+\subsection{One-Line Tool Install (All at Once)}
+
+\begin{lstlisting}[style=terminal, caption={Install all required tools in one command}]
+sudo apt update && sudo apt install -y \
+  burpsuite \
+  firefox-esr \
+  curl \
+  wget \
+  git \
+  python3 \
+  python3-pip \
+  docker.io \
+  seclists \
+  gobuster \
+  nikto \
+  nmap
+\end{lstlisting}
+
+% ─────────────────────────────────────────────────────────
+\section{Essential Security Wordlists}
+
+\begin{lstlisting}[style=terminal, caption={Install SecLists}]
+sudo apt install seclists -y
+ls /usr/share/seclists/
+\end{lstlisting}
+
+Key wordlist locations:
+
+\begin{table}[H]
+\centering
+\caption{Important SecLists wordlist paths}
+\begin{tabularx}{\textwidth}{>{\bfseries}lX}
+\toprule
+Path & Use Case \\
+\midrule
+\texttt{/usr/share/seclists/Discovery/Web-Content/} & Directory and file brute forcing \\
+\texttt{/usr/share/seclists/Passwords/} & Password brute forcing \\
+\texttt{/usr/share/seclists/Usernames/} & Username enumeration \\
+\texttt{/usr/share/wordlists/rockyou.txt.gz} & Classic password list \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\begin{lstlisting}[style=terminal, caption={Decompress rockyou.txt}]
+sudo gunzip /usr/share/wordlists/rockyou.txt.gz
+wc -l /usr/share/wordlists/rockyou.txt
+# Should show ~14 million lines
+\end{lstlisting}
+
+\exerciseblock{
+\textbf{Exercise 2.1 — System Readiness Check}\\[4pt]
+Run the following commands and confirm each produces expected output:
+\begin{lstlisting}[style=terminal]
+burpsuite --version 2>&1 | head -1
+firefox --version
+curl --version | head -1
+python3 --version
+git --version
+docker --version
+\end{lstlisting}
+All should return version numbers. If any fail, return to the relevant installation section above.
+}

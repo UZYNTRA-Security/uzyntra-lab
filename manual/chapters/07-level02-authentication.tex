@@ -1,0 +1,192 @@
+% ============================================================
+% Chapter 7 — Level 02: Authentication Security
+% ============================================================
+\chapter{Level 02 — Authentication Security}
+\label{ch:level02}
+
+\noteblock{This module is a \textbf{placeholder}. The lab environment for Level 02 (\texttt{auth.lab.uzyntra.com}) will be deployed separately. This chapter documents the learning objectives, vulnerability theory, and testing methodology that will be used when the lab is live.}
+
+% ─────────────────────────────────────────────────────────
+\section{Learning Objectives}
+
+By completing this module you will be able to:
+\begin{itemize}
+  \item Identify and exploit weak login security controls
+  \item Analyze and attack session management implementations
+  \item Test OTP (One-Time Password) workflows for vulnerabilities
+  \item Evaluate MFA (Multi-Factor Authentication) implementation quality
+  \item Use Burp Suite Intruder and Repeater for authentication attacks
+\end{itemize}
+
+% ─────────────────────────────────────────────────────────
+\section{Vulnerability Explanations}
+
+\subsection{Login Security}
+
+Authentication vulnerabilities allow attackers to bypass or subvert the login process.
+
+\begin{table}[H]
+\centering
+\caption{Common login vulnerabilities}
+\begin{tabularx}{\textwidth}{>{\bfseries}lXl}
+\toprule
+Vulnerability & Description & CWE \\
+\midrule
+Username enumeration & Different response for valid vs invalid username & CWE-204 \\
+No rate limiting & Unlimited login attempts permitted & CWE-307 \\
+Weak password policy & Short or simple passwords accepted & CWE-521 \\
+Default credentials & admin/admin, admin/password accepted & CWE-1392 \\
+Verbose errors & ``Password incorrect'' vs ``User not found'' & CWE-209 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Session Management}
+
+After authentication, the application issues a session token. Weak session management allows token theft or prediction.
+
+\begin{table}[H]
+\centering
+\caption{Session management vulnerabilities}
+\begin{tabularx}{\textwidth}{>{\bfseries}lXl}
+\toprule
+Vulnerability & Description & CWE \\
+\midrule
+Session fixation & Attacker sets a known token before login & CWE-384 \\
+Predictable tokens & Sequential or low-entropy session IDs & CWE-330 \\
+No token rotation & Token unchanged after privilege change & CWE-613 \\
+Missing cookie flags & No HttpOnly, Secure, or SameSite & CWE-614 \\
+Long session lifetime & Token valid for weeks after logout & CWE-613 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{OTP Workflow Testing}
+
+OTP vulnerabilities allow attackers to bypass two-factor authentication.
+
+\begin{itemize}
+  \item \textbf{OTP not expiring} — codes valid indefinitely
+  \item \textbf{OTP reuse} — same code accepted multiple times
+  \item \textbf{OTP brute force} — 6-digit code: only 1,000,000 possibilities
+  \item \textbf{OTP bypass} — application accepts login without OTP step
+  \item \textbf{Predictable OTP} — TOTP seed reused or derived from username
+\end{itemize}
+
+\subsection{MFA Implementation Review}
+
+\begin{itemize}
+  \item Is MFA enforced for all admin accounts?
+  \item Can MFA be skipped by directly navigating to post-login URLs?
+  \item Is the MFA backup code single-use and properly invalidated?
+  \item Does the application correctly validate the TOTP window?
+\end{itemize}
+
+% ─────────────────────────────────────────────────────────
+\section{Required Lab Setup}
+
+\begin{table}[H]
+\centering
+\caption{Level 02 Lab Configuration (Pending Deployment)}
+\begin{tabular}{ll}
+\toprule
+Field & Value \\
+\midrule
+Target & \texttt{https://auth.lab.uzyntra.com} (pending) \\
+Test accounts & \texttt{user@lab.uzyntra.com / training123} \\
+Admin account & \texttt{admin@lab.uzyntra.com / admin123} \\
+Burp proxy & \texttt{127.0.0.1:8080} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ─────────────────────────────────────────────────────────
+\section{Burp Suite Testing Process}
+
+\subsection{Testing for Username Enumeration}
+
+\begin{enumerate}
+  \item Capture the login request in Burp Proxy
+  \item Send to Repeater
+  \item Try a known valid username with wrong password $\to$ note response length/message
+  \item Try an invalid username with wrong password $\to$ compare response
+  \item If responses differ $\to$ username enumeration confirmed
+\end{enumerate}
+
+\subsection{Testing for Brute Force (Intruder)}
+
+\begin{enumerate}
+  \item Capture login POST request $\to$ Send to Intruder
+  \item Set position on password field: \texttt{password=§test§}
+  \item Load payload: \texttt{/usr/share/seclists/Passwords/Common-Credentials/10k-most-common.txt}
+  \item Start attack $\to$ sort by response length or status code
+  \item Different length/code = successful login = weak password confirmed
+\end{enumerate}
+
+\warnblock{In Community Edition, Intruder is throttled. For brute force testing in real engagements, use \texttt{hydra} or \texttt{ffuf} for speed. Intruder is fine for learning the concept.}
+
+\subsection{Testing Session Token Entropy}
+
+\begin{enumerate}
+  \item Log in 5 times with the same account
+  \item Capture each Set-Cookie header from the login response
+  \item Send all 5 cookies to Sequencer
+  \item Run the analysis — Burp evaluates token randomness
+  \item Low entropy = predictable tokens = session hijacking risk
+\end{enumerate}
+
+% ─────────────────────────────────────────────────────────
+\section{Security Testing Exercise}
+
+\exerciseblock{
+\textbf{Exercise 7.1 — Authentication Reconnaissance (Theory)}\\[4pt]
+While the lab environment is being set up, practice the analysis:
+\begin{enumerate}
+  \item Describe what HTTP response differences would confirm username enumeration
+  \item Write a Burp Intruder payload position for: \texttt{POST /login} with body \texttt{email=admin@test.com\&password=FUZZ}
+  \item List 5 cookie flag configurations that indicate a security weakness
+  \item Describe how you would test if an OTP code can be reused
+\end{enumerate}
+}
+
+% ─────────────────────────────────────────────────────────
+\section{Professional Finding Report Template}
+
+\findingblock{
+\begin{tabular}{ll}
+\textbf{Finding Title:} & Username Enumeration via Login Response \\
+\textbf{Severity:} & \textcolor{uzyellow}{\textbf{Medium}} \\
+\textbf{CWE:} & CWE-204 \\
+\textbf{OWASP:} & A07:2021 — Identification and Authentication Failures \\
+\textbf{Affected Endpoint:} & \texttt{POST /api/auth/login} \\
+\end{tabular}\\[8pt]
+\textbf{Description:}\\
+The login endpoint returns different HTTP responses for valid vs invalid usernames, allowing an attacker to enumerate valid user accounts.\\[6pt]
+\textbf{Evidence:}\\
+Valid user, wrong password: HTTP 200, body: \texttt{"error":"Invalid password"}\\
+Invalid user: HTTP 200, body: \texttt{"error":"User not found"}\\[6pt]
+\textbf{Impact:}\\
+Attacker can enumerate all valid email addresses and target them for brute force or phishing.\\[6pt]
+\textbf{Recommendation:}\\
+Return identical responses for all failed login attempts: \texttt{"Invalid credentials"}.
+}
+
+% ─────────────────────────────────────────────────────────
+\section{Module Completion Checklist}
+
+\begin{tcolorbox}[findingstyle, title={Level 02 Burp Checklist}]
+\begin{itemize}
+  \item[\checkbox] Login request captured in Burp HTTP History
+  \item[\checkbox] Username enumeration tested (valid vs invalid user responses compared)
+  \item[\checkbox] Rate limiting tested (50+ login attempts — any lockout?)
+  \item[\checkbox] Password policy tested (accepted: \texttt{a}, \texttt{123}, common passwords?)
+  \item[\checkbox] Session token captured from Set-Cookie header
+  \item[\checkbox] Cookie flags checked: HttpOnly, Secure, SameSite
+  \item[\checkbox] Session token analyzed in Sequencer for entropy
+  \item[\checkbox] Token invalidated after logout (send old token post-logout)
+  \item[\checkbox] OTP reuse tested (same code submitted twice)
+  \item[\checkbox] OTP brute force rate limiting tested
+  \item[\checkbox] MFA skip tested (navigate directly to /dashboard after step 1)
+  \item[\checkbox] All findings documented with request/response evidence
+\end{itemize}
+\end{tcolorbox}

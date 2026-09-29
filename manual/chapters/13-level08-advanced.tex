@@ -1,0 +1,79 @@
+% ============================================================
+% Chapter 13 — Level 08: Advanced Server Security
+% ============================================================
+\chapter{Level 08 — Advanced Server Security}
+\label{ch:level08}
+
+\noteblock{This module is a \textbf{placeholder}. Lab: \texttt{https://advanced.lab.uzyntra.com} (pending deployment). These topics require solid foundations from Levels 01--07.}
+
+\section{Learning Objectives}
+\begin{itemize}
+  \item Understand Server-Side Request Forgery (SSRF) and its impact
+  \item Test file upload functionality for security weaknesses
+  \item Identify server configuration issues through active testing
+\end{itemize}
+
+\section{Vulnerability Explanations}
+
+\subsection{SSRF — Server-Side Request Forgery}
+SSRF forces the server to make HTTP requests to attacker-controlled destinations. The server acts as a proxy, allowing attackers to:
+\begin{itemize}
+  \item Access internal services not exposed to the internet
+  \item Read AWS/GCP/Azure cloud metadata (\texttt{169.254.169.254})
+  \item Port-scan internal networks
+  \item Bypass IP-based access controls
+\end{itemize}
+
+\begin{lstlisting}[style=http, caption={Classic SSRF test}]
+# Vulnerable endpoint that fetches a URL:
+POST /api/fetch HTTP/1.1
+Content-Type: application/json
+
+{"url": "https://legitimate-site.com/image.jpg"}
+
+# SSRF test - try internal URL:
+{"url": "http://169.254.169.254/latest/meta-data/"}
+{"url": "http://internal-service.local/admin"}
+{"url": "http://localhost:6379"}  // Redis
+\end{lstlisting}
+
+\subsection{File Upload Security}
+File upload vulnerabilities allow attackers to upload malicious files.
+
+\begin{table}[H]
+\centering
+\caption{File upload attack vectors}
+\begin{tabularx}{\textwidth}{>{\bfseries}lX}
+\toprule
+Attack & Description \\
+\midrule
+Web shell upload & Upload \texttt{shell.php} — execute commands via browser \\
+Extension bypass & Rename \texttt{shell.php} to \texttt{shell.php.jpg} \\
+Content-Type bypass & Change MIME type from \texttt{application/x-php} to \texttt{image/jpeg} \\
+Path traversal & Upload to \texttt{../../config.php} via filename \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Configuration Issues}
+\begin{itemize}
+  \item Directory listing enabled on web server
+  \item Default credentials on admin interfaces
+  \item Unnecessary HTTP methods enabled (TRACE, PUT, DELETE)
+  \item Version information in response headers
+\end{itemize}
+
+\section{Module Completion Checklist}
+
+\begin{tcolorbox}[findingstyle, title={Level 08 Burp Checklist}]
+\begin{itemize}
+  \item[\checkbox] URL-fetching endpoints identified and tested for SSRF
+  \item[\checkbox] Internal IP ranges tested: \texttt{127.0.0.1}, \texttt{169.254.169.254}, \texttt{10.x.x.x}
+  \item[\checkbox] File upload endpoints identified
+  \item[\checkbox] Allowed file extensions tested
+  \item[\checkbox] Content-Type header bypassed in Repeater
+  \item[\checkbox] HTTP TRACE method tested: \texttt{curl -X TRACE https://target.com}
+  \item[\checkbox] Server version headers checked
+  \item[\checkbox] All findings documented with full evidence
+\end{itemize}
+\end{tcolorbox}
