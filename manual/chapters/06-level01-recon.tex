@@ -168,7 +168,7 @@ Content-Type: text/html
 % ─────────────────────────────────────────────────────────
 \section{Professional Finding Report}
 
-\findingblock{
+\begin{tcolorbox}[findingstyle]
 \begin{tabular}{ll}
 \textbf{Finding Title:} & Debug Information Disclosure \\
 \textbf{Severity:} & \textcolor{uzyellow}{\textbf{Medium}} \\
@@ -196,7 +196,7 @@ An unauthenticated attacker learns the full internal network topology and techno
 1. Remove the \texttt{/debug} endpoint from the production codebase entirely.\\
 2. If required for operations, restrict access to VPN IP range only.\\
 3. Set \texttt{NODE\_ENV=production} — suppresses debug output automatically.
-}
+\end{tcolorbox}
 
 % ─────────────────────────────────────────────────────────
 \section{Module Completion Checklist}

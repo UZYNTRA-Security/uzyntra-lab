@@ -69,6 +69,34 @@ Download and install [MiKTeX](https://miktex.org/download) or [TeX Live](https:/
 
 ## Building the PDF
 
+### Overleaf
+
+The default build includes every chapter and uses simpler breakable boxes,
+loads only the required tcolorbox library, and skips microtype processing
+to reduce compilation overhead. Change `\manualfasttrue` to
+`\manualfastfalse` in `main.tex` to restore microtype for final typography.
+This can change line wrapping and page breaks. Compilation time still
+depends on the build environment; these settings do not guarantee that
+the full manual will fit within Overleaf's time limit.
+
+Upload the complete manual project, keeping `main.tex` at the project root
+and all chapter files inside `chapters/`. Select `main.tex` as the main
+document and pdfLaTeX as the compiler, then recompile.
+
+If the log reports `Text dropped after begin of listing` followed by
+`job aborted, no legal \end found`, check for a `lstlisting` inside a
+command argument such as `\exerciseblock{...}` or `\findingblock{...}`.
+Use `\begin{tcolorbox}[exercisestyle] ... \end{tcolorbox}` or the
+`findingstyle` equivalent instead: listings must be read directly, not
+passed through a command argument.
+
+For other occurrences of `job aborted, no legal \end found`, check that the
+uploaded `main.tex` is complete: it must start with the preamble and contain
+both `\begin{document}` and the final `\end{document}`. The Dashboard
+paragraph is the end of `chapters/04-burp-interface.tex`, not the end of
+`main.tex`. Chapter files are included by the master document; do not
+replace `main.tex` with a chapter or add `\end{document}` to chapter files.
+
 ### Linux / macOS (with make)
 
 ```bash

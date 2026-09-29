@@ -10,7 +10,14 @@
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage{lmodern}
-\usepackage[final]{microtype}
+% Faster full-manual builds by default. Set false for final typography.
+\newif\ifmanualfast
+\manualfasttrue
+\ifmanualfast
+  % Skip microtype's font processing in the fast build.
+\else
+  \usepackage[final]{microtype}
+\fi
 
 % ── Page Layout ──────────────────────────────────────────
 \usepackage[
@@ -34,8 +41,8 @@
 % ── Graphics & Boxes ─────────────────────────────────────
 \usepackage{graphicx}
 \usepackage{float}
-\usepackage[most,breakable]{tcolorbox}
-\usepackage{mdframed}
+% Load only the box library used by this manual.
+\usepackage[breakable]{tcolorbox}
 
 % ── Tables ───────────────────────────────────────────────
 \usepackage{booktabs}
@@ -107,35 +114,35 @@
 % ── Custom tcolorbox styles ──────────────────────────────
 \tcbset{
   notestyle/.style={
-    enhanced, breakable,
+    breakable,
     colback=uzblue!8, colframe=uzblue,
     fonttitle=\bfseries\sffamily,
     title={[NOTE]},
     left=6pt, right=6pt, top=4pt, bottom=4pt,
   },
   warningstyle/.style={
-    enhanced, breakable,
+    breakable,
     colback=uzyellow!10, colframe=uzyellow,
     fonttitle=\bfseries\sffamily,
     title={[WARNING]},
     left=6pt, right=6pt, top=4pt, bottom=4pt,
   },
   dangerstyle/.style={
-    enhanced, breakable,
+    breakable,
     colback=uzred!8, colframe=uzred,
     fonttitle=\bfseries\sffamily,
     title={[IMPORTANT]},
     left=6pt, right=6pt, top=4pt, bottom=4pt,
   },
   exercisestyle/.style={
-    enhanced, breakable,
+    breakable,
     colback=uzgreen!5, colframe=uzgreen,
     fonttitle=\bfseries\sffamily,
     title={[EXERCISE]},
     left=6pt, right=6pt, top=4pt, bottom=4pt,
   },
   findingstyle/.style={
-    enhanced, breakable,
+    breakable,
     colback=gray!5, colframe=uzgray,
     fonttitle=\bfseries\sffamily,
     title={[FINDING TEMPLATE]},
