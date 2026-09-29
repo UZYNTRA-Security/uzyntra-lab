@@ -1,0 +1,26 @@
+# robots.txt — recon.lab.uzyntra.com
+# INTENTIONALLY VULNERABLE FOR SECURITY TRAINING
+# CWE-538: Insertion of Sensitive Information into Externally-Accessible File
+# OWASP A05:2021 - Security Misconfiguration
+#
+# In real engagements, robots.txt discloses sensitive paths that
+# developers intended to hide from search engines but accidentally
+# advertised to every attacker who looks here first.
+
+User-agent: *
+Disallow: /admin
+Disallow: /backup
+Disallow: /debug
+Disallow: /internal
+Disallow: /api/v1/users
+Disallow: /api/v1/admin
+Disallow: /.env
+Disallow: /config
+Disallow: /db-migrations
+
+# Allow public pages
+Allow: /
+Allow: /about
+Allow: /contact
+
+Sitemap: https://recon.lab.uzyntra.com/sitemap.xml
