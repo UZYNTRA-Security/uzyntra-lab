@@ -212,17 +212,21 @@
     \end{minipage}}
   \end{center}}
 
-\newcommand{\checkbox}{$\square$\ }
-\newcommand{\checked}{$\boxtimes$\ }
-\newcommand{\cmd}[1]{\texttt{\textcolor{uzblue}{#1}}}
-\newcommand{\vuln}[1]{\textbf{\textcolor{uzred}{#1}}}
-\newcommand{\endpoint}[1]{\texttt{\textcolor{uzgreen}{#1}}}
-\newcommand{\severity}[1]{%
+% Use \uz prefix to avoid conflicts with any package-defined commands
+\newcommand{\uzcheck}{$\square$\ }
+\newcommand{\uzchecked}{$\boxtimes$\ }
+\newcommand{\uzcmd}[1]{\texttt{\textcolor{uzblue}{#1}}}
+\newcommand{\uzvuln}[1]{\textbf{\textcolor{uzred}{#1}}}
+\newcommand{\uzep}[1]{\texttt{\textcolor{uzgreen}{#1}}}
+\newcommand{\uzsev}[1]{%
   \ifthenelse{\equal{#1}{Critical}}{\textbf{\textcolor{uzred}{Critical}}}{}%
   \ifthenelse{\equal{#1}{High}}{\textbf{\textcolor{uzred}{High}}}{}%
   \ifthenelse{\equal{#1}{Medium}}{\textbf{\textcolor{uzyellow}{Medium}}}{}%
   \ifthenelse{\equal{#1}{Low}}{\textbf{\textcolor{uzgreen}{Low}}}{}%
   \ifthenelse{\equal{#1}{Info}}{\textbf{\textcolor{uzblue}{Informational}}}{}}
+% Aliases kept for backward compat in chapter files
+\let\checkbox\uzcheck
+\let\cmd\uzcmd
 
 % ============================================================
 % DOCUMENT
